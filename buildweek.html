@@ -4,40 +4,237 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Build Week - Student Diary</title>
+  
   <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#071521">
   <link rel="icon" type="image/png" href="/icon-192.png">
   <link rel="apple-touch-icon" href="/icon-512.png">
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #071521; color: #ffffff; padding: 24px 16px; min-height: 100vh; }
-    
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    h1 { font-size: 28px; font-weight: 700; }
-    .badge { background: transparent; border: 1px solid #14746f; color: #53ddcd; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-    .status-text { font-size: 16px; color: #cfd8dc; margin-bottom: 8px; }
-    .instruction-text { font-size: 14px; color: #90a4ae; margin-bottom: 14px; }
+    body {
+      background: radial-gradient(circle at 10% 20%, rgba(20, 116, 111, 0.25) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(83, 221, 205, 0.15) 0%, transparent 40%),
+                  #071521;
+      color: #ffffff;
+      padding: 24px 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-    .days-container { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-    .day-btn { background: #132a3a; color: #ffffff; border: 1px solid #204b66; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; }
-    .day-btn.active { background: #53ddcd; color: #071521; border-color: #53ddcd; }
-    .day-btn.completed { border-color: #53ddcd; color: #53ddcd; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
 
-    .card { background: #0c2333; border: 1px solid #1a3f5c; border-radius: 14px; padding: 18px; margin-bottom: 20px; }
-    .input-row { display: flex; gap: 10px; margin-bottom: 14px; }
-    input[type="number"], input[type="text"] { flex: 1; background: #071521; border: 1px solid #204b66; color: #fff; padding: 12px; border-radius: 8px; font-size: 15px; outline: none; }
-    
-    .btn-add { background: #14746f; color: #ffffff; border: none; padding: 0 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    
-    .subject-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-    .subject-item { display: flex; align-items: center; gap: 10px; background: #132a3a; padding: 6px 10px; border-radius: 8px; }
-    .subject-number { font-size: 14px; font-weight: 700; color: #53ddcd; width: 22px; }
-    .btn-remove { background: #e53935; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
 
-    .btn-save-day { width: 100%; background: #53ddcd; color: #071521; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 700; margin-top: 16px; cursor: pointer; }
-    .btn-submit-week { width: 100%; background: #1a3f5c; color: #546e7a; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: not-allowed; }
-    .btn-submit-week.ready { background: #53ddcd; color: #071521; cursor: pointer; }
+    .badge {
+      background: rgba(83, 221, 205, 0.08);
+      border: 1px solid rgba(83, 221, 205, 0.35);
+      color: #53ddcd;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .status-text {
+      font-size: 15px;
+      color: #e0f2f1;
+      margin-bottom: 6px;
+    }
+
+    .instruction-text {
+      font-size: 13px;
+      color: #80cbc4;
+      margin-bottom: 16px;
+    }
+
+    /* Glassmorphism Day Selector Pills */
+    .days-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .day-btn {
+      background: rgba(255, 255, 255, 0.05);
+      color: #b2dfdb;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 9px 15px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .day-btn.active {
+      background: rgba(83, 221, 205, 0.2);
+      color: #53ddcd;
+      border-color: #53ddcd;
+      box-shadow: 0 0 15px rgba(83, 221, 205, 0.25);
+    }
+
+    .day-btn.completed {
+      border-color: rgba(83, 221, 205, 0.5);
+      color: #ffffff;
+    }
+
+    /* Glassmorphic Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+    }
+
+    input[type="number"], input[type="text"] {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: border-color 0.2s;
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus {
+      border-color: #53ddcd;
+    }
+
+    .btn-glass {
+      background: rgba(83, 221, 205, 0.15);
+      color: #53ddcd;
+      border: 1px solid rgba(83, 221, 205, 0.4);
+      padding: 0 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .btn-glass:hover {
+      background: rgba(83, 221, 205, 0.25);
+    }
+
+    .subject-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .subject-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+
+    .subject-number {
+      font-size: 14px;
+      font-weight: 700;
+      color: #53ddcd;
+      width: 22px;
+      text-align: center;
+    }
+
+    .btn-remove {
+      background: rgba(239, 83, 80, 0.15);
+      color: #ef5350;
+      border: 1px solid rgba(239, 83, 80, 0.35);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-remove:hover {
+      background: rgba(239, 83, 80, 0.3);
+    }
+
+    .btn-save-day {
+      width: 100%;
+      background: #53ddcd;
+      color: #071521;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(83, 221, 205, 0.3);
+      transition: opacity 0.2s;
+    }
+
+    .btn-save-day:hover {
+      opacity: 0.92;
+    }
+
+    .btn-submit-week {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: not-allowed;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit-week.ready {
+      background: #53ddcd;
+      color: #071521;
+      border: none;
+      box-shadow: 0 4px 20px rgba(83, 221, 205, 0.35);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -48,18 +245,18 @@
   </div>
 
   <p class="status-text" id="status-counter">0 of 5 days added</p>
-  <p class="instruction-text">1 Pick a day to fill in</p>
+  <p class="instruction-text">Pick a day to fill in subjects</p>
 
   <div class="days-container" id="days-wrapper"></div>
 
-  <!-- Day Configuration Section -->
-  <div class="card" id="day-config-card">
+  <!-- Day Configuration Glass Card -->
+  <div class="glass-card" id="day-config-card">
     <h3 id="selected-day-title" style="margin-bottom: 12px; color: #53ddcd;">Monday</h3>
     
-    <label style="font-size: 13px; color: #90a4ae;">Total number of subjects:</label>
-    <div class="input-row" style="margin-top: 6px;">
+    <label style="font-size: 13px; color: #80cbc4;">Number of subjects:</label>
+    <div class="input-row">
       <input type="number" id="subject-count-input" min="1" max="12" placeholder="e.g. 5">
-      <button class="btn-add" onclick="setSubjectCount()">Set Count</button>
+      <button class="btn-glass" onclick="setSubjectCount()">Set Count</button>
     </div>
 
     <div class="subject-list" id="subject-list-container"></div>
@@ -102,10 +299,8 @@
       const submitBtn = document.getElementById('btn-submit');
       if (completedCount === availableDays.length) {
         submitBtn.classList.add('ready');
-        submitBtn.style.cursor = 'pointer';
       } else {
         submitBtn.classList.remove('ready');
-        submitBtn.style.cursor = 'not-allowed';
       }
     }
 
@@ -118,11 +313,8 @@
       renderDays();
     }
 
-    // Set count while keeping existing subject names
     function setSubjectCount() {
       const count = parseInt(document.getElementById('subject-count-input').value) || 0;
-      
-      // Preserve typed inputs first
       syncInputsToArray();
 
       if (count > currentSubjects.length) {
@@ -144,7 +336,6 @@
       });
     }
 
-    // Render dynamic subject fields with remove button
     function renderSubjects() {
       const container = document.getElementById('subject-list-container');
       container.innerHTML = '';
@@ -161,11 +352,9 @@
         container.appendChild(row);
       });
 
-      // Automatically update the number box count
       document.getElementById('subject-count-input').value = currentSubjects.length;
     }
 
-    // Remove single subject item without wiping others
     function removeSubject(index) {
       syncInputsToArray();
       currentSubjects.splice(index, 1);
@@ -196,7 +385,6 @@
       window.location.href = '/attendance.html';
     }
 
-    // Initialize on page load
     selectDay(availableDays[0]);
   </script>
 
