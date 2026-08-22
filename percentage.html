@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Percentage</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root {
+    --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
+    --glass-surface: rgba(30, 41, 59, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-glow: rgba(56, 189, 248, 0.15);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --teal-glow: #2dd4bf;
+    --coral-glow: #f87171;
+    --amber-glow: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+  }
+
+ /* Hamburger Base Button */
+  .hamburger-btn {
+    position: fixed;
+    top: 24px;
+    left: 20px;
+    z-index: 70;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    /* Smooth sliding animation */
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
+  }
+
+  /* Moves the button to the right side of the 250px sidebar when opened */
+  .hamburger-btn.open {
+    transform: translateX(170px);
+    margin-top:10px;
+  }
+
+  /* Hamburger lines */
+  .hamburger-btn span {
+    width: 20px;
+    height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+
+  /* Cross icon transforms */
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hamburger-btn span {
+    width: 20px; height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .sidebar-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 60; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 65;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .brand { font-size: 1.15rem; font-weight: 800; }
+  .brand-sub {
+    font-size: 0.75rem; text-transform: uppercase; color: var(--teal-glow);
+    margin-bottom: 28px; font-weight: 700; letter-spacing: 0.05em;
+  }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    text-decoration: none; color: var(--text-muted);
+    font-weight: 600; font-size: 0.9rem; transition: all .2s ease;
+  }
+  .nav-link .tag {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+  .nav-link:hover, .nav-link.active {
+    background: rgba(255, 255, 255, 0.08); color: var(--teal-glow);
+  }
+  .nav-link.active .tag { background: var(--teal-glow); color: #042f2e; }
+
+  .content-area {
+    width: 100%; display: flex; justify-content: center;
+    padding: 96px 20px 60px;
+  }
+  .sheet { width: 100%; max-width: 680px; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px; margin-bottom: 24px;
+  }
+  h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+  .masthead span {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--teal-glow); background: rgba(45, 212, 191, 0.12);
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid rgba(45, 212, 191, 0.25);
+  }
+
+  .overall-banner {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 24px;
+    box-shadow: 0 8px 32px var(--glass-glow);
+    margin-bottom: 24px;
+  }
+  .overall-banner .ov-label {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--teal-glow);
+  }
+  .overall-banner .ov-pct {
+    font-size: 2rem; font-weight: 800;
+  }
+  .overall-banner .ov-pct.good { color: var(--teal-glow); }
+  .overall-banner .ov-pct.warn { color: var(--amber-glow); }
+  .overall-banner .ov-pct.bad { color: var(--coral-glow); }
+  .overall-banner .ov-detail {
+    margin-left: auto; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;
+  }
+
+  .subject-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; padding: 18px 22px;
+    margin-bottom: 14px; transition: transform .2s ease;
+  }
+  .subject-card:hover { transform: translateY(-2px); }
+  .subject-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .subject-name { font-size: 0.95rem; font-weight: 700; }
+  .subject-pct { font-size: 1rem; font-weight: 800; }
+  .subject-pct.good { color: var(--teal-glow); }
+  .subject-pct.warn { color: var(--amber-glow); }
+  .subject-pct.bad { color: var(--coral-glow); }
+
+  .bar-track {
+    width: 100%; height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px; overflow: hidden; margin-bottom: 8px;
+  }
+  .bar-fill { height: 100%; border-radius: 20px; transition: width .6s ease; }
+  .bar-fill.good { background: var(--teal-glow); box-shadow: 0 0 12px var(--teal-glow); }
+  .bar-fill.warn { background: var(--amber-glow); box-shadow: 0 0 12px var(--amber-glow); }
+  .bar-fill.bad { background: var(--coral-glow); box-shadow: 0 0 12px var(--coral-glow); }
+  .subject-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+  .legend {
+    margin-top: 24px; font-size: 0.8rem; color: var(--text-muted);
+    display: flex; gap: 20px; font-weight: 600;
+  }
+  .legend span { display: flex; align-items: center; gap: 8px; }
+  .legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend .good { background: var(--teal-glow); }
+  .legend .warn { background: var(--amber-glow); }
+  .legend .bad { background: var(--coral-glow); }
+  .empty-note {
+    background: var(--glass-surface); border: 1px dashed var(--coral-glow);
+    border-radius: 16px; padding: 20px; color: var(--coral-glow); font-weight: 600;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div>
+    <div class="brand">Student Dash</div>
+    <div class="brand-sub">daily companion</div>
+  </div>
+  <a class="nav-link" href="index.html"><span class="tag">H</span> Home</a>
+  <a class="nav-link" href="buildweek.html"><span class="tag">B</span> Build Week</a>
+  <a class="nav-link" href="attendance.html"><span class="tag">A</span> Attendance</a>
+  <a class="nav-link active" href="percentage.html"><span class="tag">P</span> Percentage</a>
+</nav>
+
+<main class="content-area">
+<div class="sheet">
+  <div class="masthead">
+    <h1>Attendance Percentage</h1>
+    <span>per subject</span>
+  </div>
+
+  <div id="overall-banner" class="overall-banner hidden">
+    <span class="ov-label">Overall</span>
+    <span class="ov-pct" id="overall-pct">—</span>
+    <span class="ov-detail" id="overall-detail">—</span>
+  </div>
+
+  <div id="empty-note" class="empty-note hidden">
+    No attendance submitted yet. Go to <a href="attendance.html" style="color:var(--flag);">Attendance</a> and submit at least one day to see percentages here.
+  </div>
+
+  <div id="subject-list"></div>
+
+  <div class="legend" id="legend"></div>
+</div>
+</main>
+
+<script>
+  const LOG_KEY = "attendanceLog";
+
+  function loadLog() {
+    try {
+      return JSON.parse(localStorage.getItem(LOG_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function statusClass(pct) {
+    if (pct >= 75) return 'good';
+    if (pct >= 60) return 'warn';
+    return 'bad';
+  }
+
+  const log = loadLog();
+  const emptyNote = document.getElementById('empty-note');
+  const subjectListEl = document.getElementById('subject-list');
+  const overallBanner = document.getElementById('overall-banner');
+  const overallPct = document.getElementById('overall-pct');
+  const overallDetail = document.getElementById('overall-detail');
+  const legend = document.getElementById('legend');
+
+  // Aggregate: subjectName -> { present, total }
+  const totals = {};
+  Object.values(log).forEach(dayEntry => {
+    Object.values(dayEntry).forEach(({ subject, status }) => {
+      if (!totals[subject]) totals[subject] = { present: 0, total: 0 };
+      totals[subject].total += 1;
+      if (status === 'present') totals[subject].present += 1;
+    });
+  });
+
+  const subjectNames = Object.keys(totals).sort();
+
+  if (subjectNames.length === 0) {
+    emptyNote.classList.remove('hidden');
+  } else {
+    let grandPresent = 0, grandTotal = 0;
+
+    subjectListEl.innerHTML = subjectNames.map(name => {
+      const { present, total } = totals[name];
+      const pct = total ? Math.round((present / total) * 100) : 0;
+      const cls = statusClass(pct);
+      grandPresent += present;
+      grandTotal += total;
+
+      return `
+        <div class="subject-card">
+          <div class="subject-top">
+            <div class="subject-name">${name}</div>
+            <div class="subject-pct ${cls}">${pct}%</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${cls}" style="width:${pct}%;"></div>
+          </div>
+          <div class="subject-meta">${present} present of ${total} classes</div>
+        </div>
+      `;
+    }).join('');
+
+    const overallPercent = grandTotal ? Math.round((grandPresent / grandTotal) * 100) : 0;
+    overallPct.textContent = `${overallPercent}%`;
+    overallPct.className = `ov-pct ${statusClass(overallPercent)}`;
+    overallDetail.textContent = `${grandPresent} / ${grandTotal} classes attended`;
+    overallBanner.classList.remove('hidden');
+
+    legend.innerHTML = `
+      <span><span class="dot good"></span> ≥75%</span>
+      <span><span class="dot warn"></span> 60–74%</span>
+      <span><span class="dot bad"></span> below 60%</span>
+    `;
+  }
+</script>
+
+<script>
+  (function(){
+    const hamburger = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar(){
+      sidebar.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    hamburger.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+  })();
+</script>
+</body>
+</html>

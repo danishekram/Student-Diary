@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Week — Timetable</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root {
+    --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
+    --glass-surface: rgba(30, 41, 59, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-glow: rgba(56, 189, 248, 0.15);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --teal-glow: #2dd4bf;
+    --coral-glow: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+  }
+
+  /* Hamburger Base Button */
+  .hamburger-btn {
+    position: fixed;
+    top: 24px;
+    left: 20px;
+    z-index: 70;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    /* Smooth sliding animation */
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
+  }
+
+  /* Moves the button to the right side of the 250px sidebar when opened */
+  .hamburger-btn.open {
+    transform: translateX(170px);
+    margin-top:10px;
+  }
+
+  /* Hamburger lines */
+  .hamburger-btn span {
+    width: 20px;
+    height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+
+  /* Cross icon transforms */
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hamburger-btn span {
+    width: 20px; height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .sidebar-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 60; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 65;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .brand { font-size: 1.15rem; font-weight: 800; }
+  .brand-sub {
+    font-size: 0.75rem; text-transform: uppercase; color: var(--teal-glow);
+    margin-bottom: 28px; font-weight: 700; letter-spacing: 0.05em;
+  }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    text-decoration: none; color: var(--text-muted);
+    font-weight: 600; font-size: 0.9rem; transition: all .2s ease;
+  }
+  .nav-link .tag {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+  .nav-link:hover, .nav-link.active {
+    background: rgba(255, 255, 255, 0.08); color: var(--teal-glow);
+  }
+  .nav-link.active .tag { background: var(--teal-glow); color: #042f2e; }
+
+  .content-area {
+    width: 100%; display: flex; justify-content: center;
+    padding: 96px 20px 60px;
+  }
+  .sheet { width: 100%; max-width: 640px; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px; margin-bottom: 28px;
+  }
+  h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+  .masthead span {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--teal-glow); background: rgba(45, 212, 191, 0.12);
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid rgba(45, 212, 191, 0.25);
+  }
+
+  .step-label, label {
+    font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; display: flex; gap: 8px; align-items: center;
+  }
+  .step-label .n {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--teal-glow); color: #042f2e;
+    display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
+  }
+
+  .day-grid, .stage-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px; margin-bottom: 24px;
+  }
+  .day-btn, .stage-btn {
+    padding: 12px 8px; background: var(--glass-surface);
+    border: 1px solid var(--glass-border); border-radius: 12px;
+    color: var(--text-main); font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all .2s ease;
+  }
+  .day-btn.selected, .stage-btn.selected {
+    background: var(--teal-glow); color: #042f2e;
+    box-shadow: 0 0 16px rgba(45, 212, 191, 0.4);
+  }
+
+  input[type="text"], input[type="number"], select {
+    width: 100%; padding: 14px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px; color: var(--text-main);
+    font-family: inherit; font-size: 0.95rem; outline: none;
+    margin-bottom: 16px;
+  }
+  input:focus, select:focus {
+    border-color: var(--teal-glow);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.3);
+  }
+
+  .subject-row {
+    display: grid; grid-template-columns: 50px 1fr; gap: 12px; align-items: center;
+  }
+  .period-tag {
+    background: rgba(45, 212, 191, 0.12); color: var(--teal-glow);
+    border-radius: 8px; padding: 12px 0; text-align: center;
+    font-size: 0.8rem; font-weight: 700;
+  }
+
+  .actions { display: flex; gap: 12px; margin-top: 24px; }
+  button.primary {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 14px 24px; border-radius: 12px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+  }
+  button.ghost {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+    color: var(--text-main); padding: 14px 20px; border-radius: 12px;
+    font-weight: 600; cursor: pointer;
+  }
+  button.submit {
+    width: 100%; padding: 16px; border-radius: 14px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; font-weight: 800; border: none; cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.3; cursor: not-allowed; }
+  .field { margin-bottom: 20px; }
+  .hidden { display: none; }
+  #progress-line{
+    margin-bottom:10px;
+  }
+  #submit-week-btn{
+    margin-top:12px;
+  }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div>
+    <div class="brand">Student Dash</div>
+    <div class="brand-sub">daily companion</div>
+  </div>
+  <a class="nav-link" href="index.html"><span class="tag">H</span> Home</a>
+  <a class="nav-link active" href="buildweek.html"><span class="tag">B</span> Build Week</a>
+  <a class="nav-link" href="attendance.html"><span class="tag">A</span> Attendance</a>
+  <a class="nav-link" href="percentage.html"><span class="tag">P</span> Percentage</a>
+</nav>
+
+<main class="content-area">
+<div class="sheet">
+  <div class="masthead">
+    <h1>Build Week</h1>
+    <span>timetable</span>
+  </div>
+
+  <div class="progress" id="progress-line">0 of 6 days added</div>
+
+  <div class="step">
+    <div class="step-label"><span class="n">1</span> Pick a day to fill in</div>
+    <div class="day-grid" id="day-grid">
+      <button class="day-btn" data-day="Monday">Mon</button>
+      <button class="day-btn" data-day="Tuesday">Tue</button>
+      <button class="day-btn" data-day="Wednesday">Wed</button>
+      <button class="day-btn" data-day="Thursday">Thu</button>
+      <button class="day-btn" data-day="Friday">Fri</button>
+      <button class="day-btn" data-day="Saturday">Sat</button>
+    </div>
+  </div>
+
+  <div class="step hidden" id="step-count">
+    <div class="step-label"><span class="n">2</span> Classes that day</div>
+    <input type="number" id="class-count" min="1" max="15" placeholder="e.g. 6">
+  </div>
+
+  <div class="step hidden" id="step-subjects">
+    <div class="step-label"><span class="n">3</span> Name each period</div>
+    <div class="subject-list" id="subject-list"></div>
+  </div>
+
+  <div class="actions hidden" id="day-actions">
+    <button class="primary" id="save-day-btn">Save this day</button>
+    <button class="ghost" id="clear-day-btn">Clear day</button>
+  </div>
+
+  <div class="saved-note hidden" id="saved-note">Saved. Pick another day above, or submit the full week below.</div>
+
+  <div class="submit-block" id="block">
+    <p>Once every day of the week has its subjects added, submit to move to attendance.</p>
+    <button class="submit" id="submit-week-btn" disabled>Submit weekly schedule →</button>
+  </div>
+</div>
+</main>
+
+<script>
+  const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const STORAGE_KEY = "timetableData";
+
+  function loadData() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  let timetableData = loadData();
+
+  const dayGrid = document.getElementById('day-grid');
+  const stepCount = document.getElementById('step-count');
+  const classCountInput = document.getElementById('class-count');
+  const stepSubjects = document.getElementById('step-subjects');
+  const subjectList = document.getElementById('subject-list');
+  const dayActions = document.getElementById('day-actions');
+  const saveDayBtn = document.getElementById('save-day-btn');
+  const clearDayBtn = document.getElementById('clear-day-btn');
+  const savedNote = document.getElementById('saved-note');
+  const progressLine = document.getElementById('progress-line');
+  const submitBtn = document.getElementById('submit-week-btn');
+
+  let selectedDay = null;
+
+  function refreshDots() {
+    dayGrid.querySelectorAll('.day-btn').forEach(btn => {
+      const day = btn.dataset.day;
+      btn.classList.toggle('has-data', !!(timetableData[day] && timetableData[day].length));
+    });
+    const filled = DAYS.filter(d => timetableData[d] && timetableData[d].length).length;
+    progressLine.textContent = `${filled} of 6 days added`;
+    submitBtn.disabled = filled < DAYS.length;
+  }
+
+  dayGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.day-btn');
+    if (!btn) return;
+    selectedDay = btn.dataset.day;
+    dayGrid.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    savedNote.classList.add('hidden');
+
+    stepCount.classList.remove('hidden');
+
+    const existing = timetableData[selectedDay];
+    if (existing && existing.length) {
+      classCountInput.value = existing.length;
+      renderSubjectInputs(existing.length, existing);
+    } else {
+      classCountInput.value = '';
+      stepSubjects.classList.add('hidden');
+      dayActions.classList.add('hidden');
+      subjectList.innerHTML = '';
+    }
+  });
+
+  classCountInput.addEventListener('input', () => {
+    const n = parseInt(classCountInput.value, 10);
+    if (!n || n < 1) {
+      stepSubjects.classList.add('hidden');
+      dayActions.classList.add('hidden');
+      subjectList.innerHTML = '';
+      return;
+    }
+    renderSubjectInputs(Math.min(n, 15));
+  });
+
+  function renderSubjectInputs(count, existingSubjects) {
+    subjectList.innerHTML = '';
+    for (let i = 1; i <= count; i++) {
+      const val = (existingSubjects && existingSubjects[i - 1]) ? existingSubjects[i - 1] : '';
+      const row = document.createElement('div');
+      row.className = 'subject-row';
+      row.innerHTML = `
+        <div class="period-tag">P${i}</div>
+        <input type="text" placeholder="Subject name" data-period="${i}" value="${val}">
+      `;
+      subjectList.appendChild(row);
+    }
+    stepSubjects.classList.remove('hidden');
+    dayActions.classList.remove('hidden');
+  }
+
+  saveDayBtn.addEventListener('click', () => {
+    if (!selectedDay) return;
+    const inputs = subjectList.querySelectorAll('input[type="text"]');
+    const subjects = [];
+    inputs.forEach(inp => subjects.push(inp.value.trim() || 'Untitled subject'));
+
+    timetableData[selectedDay] = subjects;
+    saveData(timetableData);
+    refreshDots();
+    savedNote.classList.remove('hidden');
+  });
+
+  clearDayBtn.addEventListener('click', () => {
+    if (!selectedDay) return;
+    delete timetableData[selectedDay];
+    saveData(timetableData);
+    classCountInput.value = '';
+    subjectList.innerHTML = '';
+    stepSubjects.classList.add('hidden');
+    dayActions.classList.add('hidden');
+    savedNote.classList.add('hidden');
+    refreshDots();
+  });
+
+  submitBtn.addEventListener('click', () => {
+    if (submitBtn.disabled) return;
+    saveData(timetableData);
+    window.location.href = 'attendance.html';
+  });
+
+  refreshDots();
+</script>
+
+<script>
+  (function(){
+    const hamburger = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar(){
+      sidebar.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    hamburger.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+  })();
+</script>
+</body>
+</html>

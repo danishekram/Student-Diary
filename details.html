@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Details</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root {
+    --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
+    --glass-surface: rgba(30, 41, 59, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-glow: rgba(56, 189, 248, 0.15);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --teal-glow: #2dd4bf;
+    --coral-glow: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+  }
+
+  /* Hamburger Base Button */
+  .hamburger-btn {
+    position: fixed;
+    top: 24px;
+    left: 20px;
+    z-index: 70;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    /* Smooth sliding animation */
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
+  }
+
+  /* Moves the button to the right side of the 250px sidebar when opened */
+  .hamburger-btn.open {
+    transform: translateX(170px);
+    margin-top:10px;
+  }
+
+  /* Hamburger lines */
+  .hamburger-btn span {
+    width: 20px;
+    height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+
+  /* Cross icon transforms */
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hamburger-btn span {
+    width: 20px; height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .sidebar-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 60; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 65;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .brand { font-size: 1.15rem; font-weight: 800; }
+  .brand-sub {
+    font-size: 0.75rem; text-transform: uppercase; color: var(--teal-glow);
+    margin-bottom: 28px; font-weight: 700; letter-spacing: 0.05em;
+  }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    text-decoration: none; color: var(--text-muted);
+    font-weight: 600; font-size: 0.9rem; transition: all .2s ease;
+  }
+  .nav-link .tag {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+  .nav-link:hover, .nav-link.active {
+    background: rgba(255, 255, 255, 0.08); color: var(--teal-glow);
+  }
+  .nav-link.active .tag { background: var(--teal-glow); color: #042f2e; }
+
+  .content-area {
+    width: 100%; display: flex; justify-content: center;
+    padding: 96px 20px 60px;
+  }
+  .sheet { width: 100%; max-width: 640px; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px; margin-bottom: 28px;
+  }
+  h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+  .masthead span {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--teal-glow); background: rgba(45, 212, 191, 0.12);
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid rgba(45, 212, 191, 0.25);
+  }
+
+  .step-label, label {
+    font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; display: flex; gap: 8px; align-items: center;
+  }
+  .step-label .n {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--teal-glow); color: #042f2e;
+    display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
+  }
+
+  .day-grid, .stage-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px; margin-bottom: 24px;
+  }
+  .day-btn, .stage-btn {
+    padding: 12px 8px; background: var(--glass-surface);
+    border: 1px solid var(--glass-border); border-radius: 12px;
+    color: var(--text-main); font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all .2s ease;
+  }
+  .day-btn.selected, .stage-btn.selected {
+    background: var(--teal-glow); color: #042f2e;
+    box-shadow: 0 0 16px rgba(45, 212, 191, 0.4);
+  }
+
+  input[type="text"], input[type="number"], select {
+    width: 100%; padding: 14px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px; color: var(--text-main);
+    font-family: inherit; font-size: 0.95rem; outline: none;
+    margin-bottom: 16px;
+  }
+  input:focus, select:focus {
+    border-color: var(--teal-glow);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.3);
+  }
+
+  .subject-row {
+    display: grid; grid-template-columns: 50px 1fr; gap: 12px; align-items: center;
+  }
+  .period-tag {
+    background: rgba(45, 212, 191, 0.12); color: var(--teal-glow);
+    border-radius: 8px; padding: 12px 0; text-align: center;
+    font-size: 0.8rem; font-weight: 700;
+  }
+
+  .actions { display: flex; gap: 12px; margin-top: 24px; }
+  button.primary {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 14px 24px; border-radius: 12px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+  }
+  button.ghost {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+    color: var(--text-main); padding: 14px 20px; border-radius: 12px;
+    font-weight: 600; cursor: pointer;
+  }
+  button.submit {
+    width: 100%; padding: 16px; border-radius: 14px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; font-weight: 800; border: none; cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.3; cursor: not-allowed; }
+  .field { margin-bottom: 20px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div>
+    <div class="brand">Student Dash</div>
+    <div class="brand-sub">daily companion</div>
+  </div>
+  <a class="nav-link" href="index.html"><span class="tag">H</span> Home</a>
+  <a class="nav-link" href="buildweek.html"><span class="tag">B</span> Build Week</a>
+  <a class="nav-link" href="attendance.html"><span class="tag">A</span> Attendance</a>
+  <a class="nav-link" href="percentage.html"><span class="tag">P</span> Percentage</a>
+</nav>
+
+<main class="content-area">
+  <div class="sheet">
+    <div class="masthead">
+      <h1>Student Details</h1>
+      <span>enrollment</span>
+    </div>
+
+    <form id="student-form">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" placeholder="e.g. Ananya Shah" required>
+      </div>
+
+      <div class="field">
+        <label for="classes">Class / course</label>
+        <input type="text" id="classes" placeholder="e.g. B.Sc. Computer Science" required>
+      </div>
+
+      <div class="field">
+        <label for="institute">School or college name</label>
+        <input type="text" id="institute" placeholder="e.g. St. Xavier's College" required>
+      </div>
+
+      <div class="field">
+        <label>Current stage</label>
+        <div class="stage-grid" id="stage-grid">
+          <button type="button" class="stage-btn" data-stage="School">School</button>
+          <button type="button" class="stage-btn" data-stage="UG">Undergrad (UG)</button>
+          <button type="button" class="stage-btn" data-stage="PG">Postgrad (PG)</button>
+        </div>
+        <div class="error" id="stage-error">Pick one to continue.</div>
+      </div>
+
+      <div class="field hidden" id="semester-field">
+        <label for="semester">Current semester</label>
+        <select id="semester">
+          <option value="">Select semester</option>
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option><option>7</option><option>8</option>
+        </select>
+        <div class="hint">Shown because UG was selected.</div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="primary">Save & go to Home</button>
+        <button type="button" class="ghost" id="reset-btn">Clear</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  const STORAGE_KEY = "studentInfo";
+
+  const stageGrid = document.getElementById('stage-grid');
+  const semesterField = document.getElementById('semester-field');
+  const semesterSelect = document.getElementById('semester');
+  const stageError = document.getElementById('stage-error');
+  const form = document.getElementById('student-form');
+  const resetBtn = document.getElementById('reset-btn');
+  const nameInput = document.getElementById('name');
+  const classesInput = document.getElementById('classes');
+  const instituteInput = document.getElementById('institute');
+
+  let selectedStage = null;
+
+  // Pre-fill if details already exist
+  (function prefill() {
+    try {
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (!existing) return;
+      nameInput.value = existing.name || '';
+      classesInput.value = existing.classes || '';
+      instituteInput.value = existing.institute || '';
+      if (existing.stage) {
+        selectedStage = existing.stage;
+        stageGrid.querySelectorAll('.stage-btn').forEach(b => {
+          b.classList.toggle('selected', b.dataset.stage === existing.stage);
+        });
+        if (existing.stage === 'UG') {
+          semesterField.classList.remove('hidden');
+          semesterSelect.value = existing.semester || '';
+        }
+      }
+    } catch (e) { /* ignore */ }
+  })();
+
+  stageGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.stage-btn');
+    if (!btn) return;
+    selectedStage = btn.dataset.stage;
+    document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    stageError.style.display = 'none';
+
+    if (selectedStage === 'UG') {
+      semesterField.classList.remove('hidden');
+    } else {
+      semesterField.classList.add('hidden');
+      semesterSelect.value = '';
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (!selectedStage) {
+      stageError.style.display = 'block';
+      return;
+    }
+
+    const info = {
+      name: nameInput.value.trim(),
+      classes: classesInput.value.trim(),
+      institute: instituteInput.value.trim(),
+      stage: selectedStage,
+      semester: selectedStage === 'UG' ? semesterSelect.value : null
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+    window.location.href = 'index.html';
+  });
+
+  resetBtn.addEventListener('click', () => {
+    form.reset();
+    selectedStage = null;
+    document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('selected'));
+    semesterField.classList.add('hidden');
+    stageError.style.display = 'none';
+  });
+</script>
+
+<script>
+  (function(){
+    const hamburger = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar(){
+      sidebar.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    hamburger.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+  })();
+</script>
+</body>
+</html>

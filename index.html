@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home — Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root {
+    --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
+    --glass-surface: rgba(30, 41, 59, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-glow: rgba(56, 189, 248, 0.15);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --teal-glow: #2dd4bf;
+    --coral-glow: #f87171;
+    --amber-glow: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+  }
+
+  /* Hamburger Base Button */
+  .hamburger-btn {
+    position: fixed;
+    top: 24px;
+    left: 20px;
+    z-index: 70;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    /* Smooth sliding animation */
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
+  }
+
+  /* Moves the button to the right side of the 250px sidebar when opened */
+  .hamburger-btn.open {
+    transform: translateX(170px);
+    margin-top:10px;
+  }
+
+  /* Hamburger lines */
+  .hamburger-btn span {
+    width: 20px;
+    height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+
+  /* Cross icon transforms */
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hamburger-btn span {
+    width: 20px; height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .sidebar-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 60; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+
+ .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 65;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .brand { font-size: 1.15rem; font-weight: 800; }
+  .brand-sub {
+    font-size: 0.75rem; text-transform: uppercase; color: var(--teal-glow);
+    margin-bottom: 28px; font-weight: 700; letter-spacing: 0.05em;
+  }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    text-decoration: none; color: var(--text-muted);
+    font-weight: 600; font-size: 0.9rem; transition: all .2s ease;
+  }
+  .nav-link .tag {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+  .nav-link:hover, .nav-link.active {
+    background: rgba(255, 255, 255, 0.08); color: var(--teal-glow);
+  }
+  .nav-link.active .tag { background: var(--teal-glow); color: #042f2e; }
+
+  .content-area {
+    width: 100%; display: flex; justify-content: center;
+    padding: 96px 20px 60px;
+  }
+  .sheet { width: 100%; max-width: 680px; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px; margin-bottom: 28px;
+  }
+  h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+  .masthead span {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--teal-glow); background: rgba(45, 212, 191, 0.12);
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid rgba(45, 212, 191, 0.25);
+  }
+
+  .profile-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px var(--glass-glow);
+  }
+  .profile-row {
+    display: grid; grid-template-columns: 160px 1fr;
+    padding: 16px 22px; border-bottom: 1px solid var(--glass-border);
+    font-size: 0.95rem;
+  }
+  .profile-row:last-child { border-bottom: none; }
+  .profile-row .k { color: var(--text-muted); font-weight: 500; }
+  .profile-row div:last-child { font-weight: 600; color: var(--text-main); }
+
+  .profile-actions { margin-top: 24px; display: flex; gap: 12px; }
+  button.ghost, a.ghost {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main); padding: 12px 20px;
+    border-radius: 12px; font-weight: 600; text-decoration: none;
+    font-size: 0.9rem; transition: background .2s ease;
+  }
+  button.ghost:hover, a.ghost:hover { background: rgba(255,255,255,0.1); }
+
+  button.primary, a.primary {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 24px; border-radius: 12px;
+    font-weight: 700; text-decoration: none; font-size: 0.9rem;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+    transition: transform .15s ease;
+  }
+  button.primary:hover, a.primary:hover { transform: translateY(-1px); }
+
+  .empty-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px dashed var(--coral-glow);
+    border-radius: 20px; padding: 32px 24px; text-align: center;
+  }
+  .empty-card p { margin-bottom: 20px; color: var(--coral-glow); font-weight: 600; }
+
+  .quick-links { margin-top: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .quick-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; padding: 20px;
+    text-decoration: none; color: var(--text-main);
+    transition: transform .2s ease, border-color .2s ease;
+  }
+  .quick-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--teal-glow);
+    box-shadow: 0 0 16px rgba(45, 212, 191, 0.2);
+  }
+  .quick-card .qt { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+  .quick-card .qd { font-size: 0.8rem; color: var(--text-muted); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div>
+    <div class="brand">Student Dash</div>
+    <div class="brand-sub">daily companion</div>
+  </div>
+  <a class="nav-link active" href="index.html"><span class="tag">H</span> Home</a>
+  <a class="nav-link" href="buildweek.html"><span class="tag">B</span> Build Week</a>
+  <a class="nav-link" href="attendance.html"><span class="tag">A</span> Attendance</a>
+  <a class="nav-link" href="percentage.html"><span class="tag">P</span> Percentage</a>
+</nav>
+
+<main class="content-area">
+  <div class="sheet">
+    <div class="masthead">
+      <h1>Home</h1>
+      <span>profile</span>
+    </div>
+
+    <div id="empty-state" class="empty-card hidden">
+      <p>No details saved yet — add your name, class and institute to get started.</p>
+      <a class="primary" href="details.html">Add my details →</a>
+    </div>
+
+    <div id="filled-state" class="hidden">
+      <div class="profile-card" id="profile-card"></div>
+      <div class="profile-actions">
+        <a class="ghost" href="details.html">Edit details</a>
+        <a class="primary" href="buildweek.html">Build week →</a>
+      </div>
+    </div>
+
+    <div class="quick-links">
+      <a class="quick-card" href="buildweek.html">
+        <div class="qt">Build Week</div>
+        <div class="qd">Set subjects for each day</div>
+      </a>
+      <a class="quick-card" href="attendance.html">
+        <div class="qt">Attendance</div>
+        <div class="qd">Mark today's classes</div>
+      </a>
+    </div>
+  </div>
+</main>
+
+<script>
+  const STORAGE_KEY = "studentInfo";
+
+  function loadStudentInfo() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  const info = loadStudentInfo();
+  const emptyState = document.getElementById('empty-state');
+  const filledState = document.getElementById('filled-state');
+  const profileCard = document.getElementById('profile-card');
+
+  if (!info || !info.name) {
+    emptyState.classList.remove('hidden');
+  } else {
+    filledState.classList.remove('hidden');
+
+    const rows = [
+      ['Name', info.name],
+      ['Class / course', info.classes || '—'],
+      ['Institute', info.institute || '—'],
+      ['Stage', info.stage || '—'],
+    ];
+    if (info.stage === 'UG') {
+      rows.push(['Semester', info.semester || 'not selected']);
+    }
+
+    profileCard.innerHTML = rows.map(([k, v]) => `
+      <div class="profile-row"><div class="k">${k}</div><div>${v}</div></div>
+    `).join('');
+  }
+</script>
+
+<script>
+  (function(){
+    const hamburger = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar(){
+      sidebar.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    hamburger.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+  })();
+</script>
+</body>
+</html>

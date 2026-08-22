@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Take Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root {
+    --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
+    --glass-surface: rgba(30, 41, 59, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-glow: rgba(56, 189, 248, 0.15);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --teal-glow: #2dd4bf;
+    --coral-glow: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+  }
+
+  /* Hamburger Base Button */
+  .hamburger-btn {
+    position: fixed;
+    top: 24px;
+    left: 20px;
+    z-index: 70;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    /* Smooth sliding animation */
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
+  }
+
+  /* Moves the button to the right side of the 250px sidebar when opened */
+  .hamburger-btn.open {
+    transform: translateX(170px);
+    margin-top:10px;
+  }
+
+  /* Hamburger lines */
+  .hamburger-btn span {
+    width: 20px;
+    height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+
+  /* Cross icon transforms */
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hamburger-btn span {
+    width: 20px; height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .sidebar-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 60; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 65;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .brand { font-size: 1.15rem; font-weight: 800; }
+  .brand-sub {
+    font-size: 0.75rem; text-transform: uppercase; color: var(--teal-glow);
+    margin-bottom: 28px; font-weight: 700; letter-spacing: 0.05em;
+  }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    text-decoration: none; color: var(--text-muted);
+    font-weight: 600; font-size: 0.9rem; transition: all .2s ease;
+  }
+  .nav-link .tag {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+  .nav-link:hover, .nav-link.active {
+    background: rgba(255, 255, 255, 0.08); color: var(--teal-glow);
+  }
+  .nav-link.active .tag { background: var(--teal-glow); color: #042f2e; }
+
+  .content-area {
+    width: 100%; display: flex; justify-content: center;
+    padding: 96px 20px 60px;
+  }
+  .sheet { width: 100%; max-width: 680px; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px; margin-bottom: 24px;
+  }
+  h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+  .masthead a {
+    font-size: 0.85rem; font-weight: 700; color: var(--teal-glow);
+    text-decoration: none;
+  }
+
+  .today-banner {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 24px; border-radius: 16px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px var(--glass-glow);
+    margin-bottom: 24px;
+  }
+  .today-banner .today-label {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--teal-glow); background: rgba(45, 212, 191, 0.12);
+    padding: 4px 10px; border-radius: 8px;
+  }
+  .today-banner .today-day { font-size: 1.15rem; font-weight: 700; }
+  .today-banner .today-date { font-size: 0.85rem; color: var(--text-muted); margin-left: auto; }
+
+  .result-list {
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 12px 20px;
+    box-shadow: 0 8px 32px var(--glass-glow);
+  }
+  .result-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 0; border-bottom: 1px solid var(--glass-border);
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .subject-name { font-size: 0.95rem; font-weight: 600; }
+
+  .period-tag {
+    display: none;
+  }
+
+  .attendance-toggle {
+    position: relative; display: flex;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 30px; padding: 4px; gap: 4px;
+    border: 1px solid var(--glass-border);
+  }
+  .attendance-toggle .slider { display: none; }
+  .attendance-toggle button {
+    background: transparent; border: none;
+    color: var(--text-muted); padding: 8px 18px;
+    border-radius: 20px; font-weight: 700; font-size: 0.8rem;
+    cursor: pointer; transition: all .25s ease;
+  }
+  .attendance-toggle button.active[data-status="present"],
+  .attendance-toggle button.active:first-of-type {
+    background: var(--teal-glow); color: #042f2e;
+    box-shadow: 0 0 16px rgba(45, 212, 191, 0.5);
+  }
+  .attendance-toggle.absent button.active,
+  .attendance-toggle button.active[data-status="absent"] {
+    background: var(--coral-glow); color: #450a0a;
+    box-shadow: 0 0 16px rgba(248, 113, 113, 0.5);
+  }
+
+  .summary-line {
+    margin-top: 18px; font-size: 0.85rem;
+    color: var(--teal-glow); text-align: right; font-weight: 600;
+  }
+
+  .submit-row { margin-top: 24px; }
+  .submit-btn {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+    transition: transform .15s ease;
+  }
+  .submit-btn:hover { transform: translateY(-1px); }
+  .submitted-note {
+    font-size: 0.85rem; color: var(--teal-glow);
+    margin-top: 12px; text-align: center; font-weight: 600;
+  }
+  .empty-note {
+    background: var(--glass-surface); border: 1px dashed var(--coral-glow);
+    border-radius: 16px; padding: 20px; color: var(--coral-glow); font-weight: 600;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div>
+    <div class="brand">Student Dash</div>
+    <div class="brand-sub">daily companion</div>
+  </div>
+  <a class="nav-link" href="index.html"><span class="tag">H</span> Home</a>
+  <a class="nav-link" href="buildweek.html"><span class="tag">B</span> Build Week</a>
+  <a class="nav-link active" href="attendance.html"><span class="tag">A</span> Attendance</a>
+  <a class="nav-link" href="percentage.html"><span class="tag">P</span> Percentage</a>
+</nav>
+
+<main class="content-area">
+<div class="sheet">
+  <div class="masthead">
+    <h1>Take Attendance</h1>
+    <a href="buildweek.html">Edit schedule</a>
+  </div>
+
+  <div class="today-banner">
+    <span class="today-label">Today</span>
+    <span class="today-day" id="today-day-name">—</span>
+    <span class="today-date" id="today-date">—</span>
+  </div>
+
+  <div class="empty-note hidden" id="empty-note"></div>
+
+  <div id="result">
+    <div class="result-list" id="result-list"></div>
+    <div class="summary-line" id="summary-line"></div>
+    <div class="submit-row hidden" id="submit-row">
+      <button class="submit-btn" id="submit-attendance-btn">Submit today's attendance</button>
+      <div class="submitted-note hidden" id="submitted-note">Saved to your attendance record.</div>
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+  const STORAGE_KEY = "timetableData";
+  const LOG_KEY = "attendanceLog";
+
+  function loadData() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function loadLog() {
+    try {
+      return JSON.parse(localStorage.getItem(LOG_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveLog(log) {
+    localStorage.setItem(LOG_KEY, JSON.stringify(log));
+  }
+
+  const timetableData = loadData();
+
+  const emptyNote = document.getElementById('empty-note');
+  const resultList = document.getElementById('result-list');
+  const summaryLine = document.getElementById('summary-line');
+  const todayDayName = document.getElementById('today-day-name');
+  const todayDateEl = document.getElementById('today-date');
+  const submitRow = document.getElementById('submit-row');
+  const submitBtn = document.getElementById('submit-attendance-btn');
+  const submittedNote = document.getElementById('submitted-note');
+
+  let attendance = {}; // period-index -> 'present' | 'absent'
+  let currentSubjects = [];
+  let currentDateKey = null;
+
+  function getISTNow() {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kolkata',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).formatToParts(new Date());
+
+    const map = {};
+    parts.forEach(p => { map[p.type] = p.value; });
+
+    // Stable YYYY-MM-DD key in IST, independent of display locale
+    const isoParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+
+    return {
+      day: map.weekday,
+      dateLabel: `${map.month} ${map.day}, ${map.year}`,
+      dateKey: isoParts
+    };
+  }
+
+  function showEmpty(message) {
+    emptyNote.textContent = message;
+    emptyNote.classList.remove('hidden');
+    resultList.innerHTML = '';
+    summaryLine.textContent = '';
+    submitRow.classList.add('hidden');
+  }
+
+  function loadTodayAttendance() {
+    const { day, dateLabel, dateKey } = getISTNow();
+    todayDayName.textContent = day;
+    todayDateEl.textContent = `${dateLabel} · IST`;
+    currentDateKey = dateKey;
+
+    if (day === 'Sunday') {
+      showEmpty("It's Sunday — no classes today.");
+      return;
+    }
+
+    const subjects = timetableData[day];
+
+    if (!subjects || !subjects.length) {
+      showEmpty('No subjects saved for today yet. Go back and build the week\u2019s schedule first.');
+      return;
+    }
+
+    emptyNote.classList.add('hidden');
+    currentSubjects = subjects;
+
+    // If today was already submitted, restore those statuses instead of defaulting to present
+    const log = loadLog();
+    const existingEntry = log[dateKey];
+
+    attendance = {};
+    subjects.forEach((s, idx) => {
+      attendance[idx] = (existingEntry && existingEntry[idx] && existingEntry[idx].status) || 'present';
+    });
+
+    resultList.innerHTML = subjects.map((subject, idx) => `
+      <div class="result-row" data-index="${idx}">
+        <div class="period-tag">P${idx + 1}</div>
+        <div class="subject-name">${subject}</div>
+        <div class="attendance-toggle ${attendance[idx] === 'absent' ? 'absent' : ''}" data-index="${idx}">
+          <div class="slider"></div>
+          <button type="button" class="${attendance[idx] === 'present' ? 'active' : ''}" data-status="present">Present</button>
+          <button type="button" class="${attendance[idx] === 'absent' ? 'active' : ''}" data-status="absent">Absent</button>
+        </div>
+      </div>
+    `).join('');
+
+    submitRow.classList.remove('hidden');
+    submittedNote.classList.toggle('hidden', !existingEntry);
+    if (existingEntry) submittedNote.textContent = "Already saved for today — resubmit to update.";
+
+    updateSummary();
+  }
+
+  resultList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-status]');
+    if (!btn) return;
+    const toggle = btn.closest('.attendance-toggle');
+    const idx = toggle.dataset.index;
+    const status = btn.dataset.status;
+
+    attendance[idx] = status;
+    toggle.classList.toggle('absent', status === 'absent');
+    toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.status === status));
+    updateSummary();
+  });
+
+  submitBtn.addEventListener('click', () => {
+    if (!currentDateKey || !currentSubjects.length) return;
+
+    const log = loadLog();
+    const entry = {};
+    currentSubjects.forEach((subject, idx) => {
+      entry[idx] = { subject, status: attendance[idx] };
+    });
+    log[currentDateKey] = entry; // overwrite = safe to resubmit, no double counting
+    saveLog(log);
+
+    submittedNote.textContent = "Saved to your attendance record.";
+    submittedNote.classList.remove('hidden');
+  });
+
+  function updateSummary() {
+    const total = Object.keys(attendance).length;
+    const present = Object.values(attendance).filter(v => v === 'present').length;
+    const absent = total - present;
+    summaryLine.textContent = `${present} present · ${absent} absent · ${total} total`;
+  }
+
+  loadTodayAttendance();
+</script>
+
+<script>
+  (function(){
+    const hamburger = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar(){
+      sidebar.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    hamburger.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+  })();
+</script>
+</body>
+</html>
