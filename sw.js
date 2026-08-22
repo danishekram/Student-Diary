@@ -1,4 +1,4 @@
-const CACHE_NAME = 'student-diary-v1';
+const CACHE_NAME = 'student-diary-v3'; // Bumping this forces all phones to update
 const ASSETS = [
   '/',
   '/index.html',
@@ -12,37 +12,36 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting(); // Instantly activates the new version
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.map((k) => {
-          if (k !== CACHE_NAME) return caches.delete(k);
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key); // Deletes old cached files from other devices
+          }
         })
       )
     )
   );
-  self.clients.claim();
+  return self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return (
-        cachedResponse ||
-        fetch(e.request).then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, networkResponse.clone());
-            return networkResponse;
-          });
-        })
-      );
-    })
+    fetch(e.request)
+      .then((networkResponse) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, networkResponse.clone());
+          return networkResponse;
+        });
+      })
+      .catch(() => caches.match(e.request)) // Network-first approach: fresh files load first
   );
 });
