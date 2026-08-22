@@ -351,5 +351,21 @@
     overlay.addEventListener('click', toggleSidebar);
   })();
 </script>
+<script>
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href && link.origin === window.location.origin) {
+      e.preventDefault();
+      fetch(link.href)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          document.body.innerHTML = doc.body.innerHTML;
+          window.history.pushState({}, '', link.href);
+        });
+    }
+  });
+</script>
 </body>
 </html>
