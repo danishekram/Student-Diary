@@ -110,21 +110,88 @@
     border: 1px solid rgba(45, 212, 191, 0.25);
   }
 
-  /* Centered Profile Avatar Area */
+  /* Centered Profile Avatar Area with Edit Badge */
   .profile-avatar-center {
     display: flex; justify-content: center; align-items: center;
     margin-bottom: 20px;
   }
+  .avatar-container {
+    position: relative; width: 94px; height: 94px;
+  }
   .avatar-circle {
-    width: 90px; height: 90px; border-radius: 50%;
+    width: 100%; height: 100%; border-radius: 50%;
     border: 2px solid var(--teal-glow); padding: 3px;
     background: var(--glass-surface); box-shadow: 0 0 25px rgba(45, 212, 191, 0.35);
     overflow: hidden;
   }
   .avatar-img {
     width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
-    display: block;
+    display: block; background: #0f172a;
   }
+
+  /* Edit Button on Bottom Right */
+  .avatar-edit-badge {
+    position: absolute; bottom: 0; right: 0;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--teal-glow); color: #042f2e;
+    border: 2px solid #0f172a; display: flex;
+    align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    transition: transform .2s ease, background .2s ease;
+  }
+  .avatar-edit-badge:hover {
+    transform: scale(1.1);
+  }
+  .avatar-edit-badge svg {
+    width: 14px; height: 14px; fill: #042f2e;
+  }
+  #avatar-direct-input { display: none; }
+
+  /* Crop Modal */
+  .crop-modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(10, 15, 29, 0.85);
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .crop-modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .crop-card {
+    background: #0f172a; border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 24px; width: 100%; max-width: 360px;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  }
+  .crop-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+  .crop-hint { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .crop-container {
+    position: relative; width: 240px; height: 240px;
+    border-radius: 50%; overflow: hidden;
+    border: 2px solid var(--teal-glow);
+    background: #000; box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
+    touch-action: none; cursor: grab;
+  }
+  .crop-container:active { cursor: grabbing; }
+
+  #crop-img {
+    position: absolute; user-select: none;
+    transform-origin: center center;
+    max-width: none;
+  }
+
+  .zoom-wrapper {
+    width: 100%; margin-top: 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .zoom-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+  .zoom-slider { flex: 1; accent-color: var(--teal-glow); cursor: pointer; }
+
+  .crop-actions { display: flex; gap: 10px; width: 100%; margin-top: 20px; }
+  .crop-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.9rem; }
+  .btn-crop-cancel { background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); color: var(--text-main); }
+  .btn-crop-save { background: var(--teal-glow); color: #042f2e; border: none; }
 
   .profile-card {
     background: var(--glass-surface);
@@ -221,10 +288,19 @@
     </div>
 
     <div id="filled-state" class="hidden">
-      <!-- Centered Circular Profile Photo -->
+      <!-- Profile Avatar Container with Edit Button -->
       <div class="profile-avatar-center">
-        <div class="avatar-circle">
-          <img id="home-avatar-img" class="avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile Photo">
+        <div class="avatar-container">
+          <div class="avatar-circle">
+            <img id="home-avatar-img" class="avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile Photo">
+          </div>
+          <!-- Edit Pencil Badge -->
+          <label for="avatar-direct-input" class="avatar-edit-badge" title="Change Photo">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+          </label>
+          <input type="file" id="avatar-direct-input" accept="image/*">
         </div>
       </div>
 
@@ -249,6 +325,28 @@
   </div>
 </main>
 
+<!-- Interactive Image Crop & Adjust Modal -->
+<div class="crop-modal-overlay" id="crop-modal">
+  <div class="crop-card">
+    <div class="crop-title">Adjust Photo</div>
+    <div class="crop-hint">Drag to position · Zoom below</div>
+    
+    <div class="crop-container" id="crop-container">
+      <img id="crop-img" alt="Crop Target" draggable="false">
+    </div>
+
+    <div class="zoom-wrapper">
+      <span class="zoom-label">Zoom</span>
+      <input type="range" id="zoom-slider" class="zoom-slider" min="1" max="3" step="0.01" value="1">
+    </div>
+
+    <div class="crop-actions">
+      <button type="button" class="btn-crop-cancel" id="btn-crop-cancel">Cancel</button>
+      <button type="button" class="btn-crop-save" id="btn-crop-save">Done</button>
+    </div>
+  </div>
+</div>
+
 <script>
   const STORAGE_KEY = "studentInfo";
 
@@ -260,11 +358,19 @@
     }
   }
 
-  const info = loadStudentInfo();
+  let info = loadStudentInfo();
   const emptyState = document.getElementById('empty-state');
   const filledState = document.getElementById('filled-state');
   const profileCard = document.getElementById('profile-card');
   const homeAvatarImg = document.getElementById('home-avatar-img');
+
+  const avatarDirectInput = document.getElementById('avatar-direct-input');
+  const cropModal = document.getElementById('crop-modal');
+  const cropContainer = document.getElementById('crop-container');
+  const cropImg = document.getElementById('crop-img');
+  const zoomSlider = document.getElementById('zoom-slider');
+  const btnCropSave = document.getElementById('btn-crop-save');
+  const btnCropCancel = document.getElementById('btn-crop-cancel');
 
   if (!info || !info.name) {
     emptyState.classList.remove('hidden');
@@ -289,6 +395,115 @@
       <div class="profile-row"><div class="k">${k}</div><div>${v}</div></div>
     `).join('');
   }
+
+  // Pan / Zoom cropping logic directly on Home
+  let imgX = 0, imgY = 0;
+  let scale = 1;
+  let baseWidth = 0, baseHeight = 0;
+  let isDragging = false;
+  let startX = 0, startY = 0;
+
+  avatarDirectInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      cropImg.onload = function() {
+        const C_SIZE = 240;
+        const nw = cropImg.naturalWidth;
+        const nh = cropImg.naturalHeight;
+        
+        const ratio = Math.max(C_SIZE / nw, C_SIZE / nh);
+        baseWidth = nw * ratio;
+        baseHeight = nh * ratio;
+
+        scale = 1;
+        zoomSlider.value = 1;
+
+        imgX = (C_SIZE - baseWidth) / 2;
+        imgY = (C_SIZE - baseHeight) / 2;
+
+        updateCropTransform();
+        cropModal.classList.add('open');
+      };
+      cropImg.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+    avatarDirectInput.value = '';
+  });
+
+  function updateCropTransform() {
+    cropImg.style.width = `${baseWidth}px`;
+    cropImg.style.height = `${baseHeight}px`;
+    cropImg.style.transform = `translate(${imgX}px, ${imgY}px) scale(${scale})`;
+  }
+
+  function onPointerDown(e) {
+    isDragging = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    startX = clientX - imgX;
+    startY = clientY - imgY;
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    imgX = clientX - startX;
+    imgY = clientY - startY;
+    updateCropTransform();
+  }
+
+  function onPointerUp() { isDragging = false; }
+
+  cropContainer.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+
+  cropContainer.addEventListener('touchstart', onPointerDown);
+  window.addEventListener('touchmove', onPointerMove);
+  window.addEventListener('touchend', onPointerUp);
+
+  zoomSlider.addEventListener('input', function() {
+    scale = parseFloat(this.value);
+    updateCropTransform();
+  });
+
+  btnCropCancel.addEventListener('click', () => {
+    cropModal.classList.remove('open');
+  });
+
+  btnCropSave.addEventListener('click', () => {
+    const canvas = document.createElement('canvas');
+    const OUTPUT_SIZE = 240;
+    canvas.width = OUTPUT_SIZE;
+    canvas.height = OUTPUT_SIZE;
+    const ctx = canvas.getContext('2d');
+
+    ctx.beginPath();
+    ctx.arc(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+
+    const currentW = baseWidth * scale;
+    const currentH = baseHeight * scale;
+    const renderX = imgX + (baseWidth * (1 - scale)) / 2;
+    const renderY = imgY + (baseHeight * (1 - scale)) / 2;
+
+    ctx.drawImage(cropImg, renderX, renderY, currentW, currentH);
+
+    const croppedAvatar = canvas.toDataURL('image/jpeg', 0.88);
+    homeAvatarImg.src = croppedAvatar;
+
+    // Update LocalStorage immediately
+    info = loadStudentInfo() || {};
+    info.avatar = croppedAvatar;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+
+    cropModal.classList.remove('open');
+  });
 </script>
 
 <script>
