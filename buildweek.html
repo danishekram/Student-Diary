@@ -1,399 +1,478 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Build Week - Student Diary</title>
-  
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#071521">
-  <link rel="icon" type="image/png" href="/icon-192.png">
-  <link rel="apple-touch-icon" href="/icon-512.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Week — Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-512.png">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+<style>
+ :root {
+    --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
+    --glass-surface: rgba(30, 41, 59, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-glow: rgba(56, 189, 248, 0.15);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --teal-glow: #2dd4bf;
+    --coral-glow: #f87171;
+    --amber-glow: #fbbf24;
+  }
 
-    body {
-      background: radial-gradient(circle at 10% 20%, rgba(20, 116, 111, 0.25) 0%, transparent 40%),
-                  radial-gradient(circle at 90% 80%, rgba(83, 221, 205, 0.15) 0%, transparent 40%),
-                  #071521;
-      color: #ffffff;
-      padding: 24px 16px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+  body {
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+  }
 
-    h1 {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
+  /* Hamburger Base Button */
+  .hamburger-btn {
+    position: fixed;
+    top: 24px;
+    left: 20px;
+    z-index: 70;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-surface);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
+  }
 
-    .badge {
-      background: rgba(83, 221, 205, 0.08);
-      border: 1px solid rgba(83, 221, 205, 0.35);
-      color: #53ddcd;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
+  .hamburger-btn.open {
+    transform: translateX(170px);
+    margin-top: 10px;
+  }
 
-    .status-text {
-      font-size: 15px;
-      color: #e0f2f1;
-      margin-bottom: 6px;
-    }
+  .hamburger-btn span {
+    width: 20px;
+    height: 2px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
 
-    .instruction-text {
-      font-size: 13px;
-      color: #80cbc4;
-      margin-bottom: 16px;
-    }
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    /* Glassmorphism Day Selector Pills */
-    .days-container {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 22px;
-    }
+  .sidebar-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 60; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
 
-    .day-btn {
-      background: rgba(255, 255, 255, 0.05);
-      color: #b2dfdb;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 9px 15px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: all 0.2s ease;
-    }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 65;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .brand { font-size: 1.15rem; font-weight: 800; }
+  .brand-sub {
+    font-size: 0.75rem; text-transform: uppercase; color: var(--teal-glow);
+    margin-bottom: 28px; font-weight: 700; letter-spacing: 0.05em;
+  }
 
-    .day-btn.active {
-      background: rgba(83, 221, 205, 0.2);
-      color: #53ddcd;
-      border-color: #53ddcd;
-      box-shadow: 0 0 15px rgba(83, 221, 205, 0.25);
-    }
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    text-decoration: none; color: var(--text-muted);
+    font-weight: 600; font-size: 0.9rem; transition: all .2s ease;
+  }
+  .nav-link .tag {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+  .nav-link:hover, .nav-link.active {
+    background: rgba(255, 255, 255, 0.08); color: var(--teal-glow);
+  }
+  .nav-link.active .tag { background: var(--teal-glow); color: #042f2e; }
 
-    .day-btn.completed {
-      border-color: rgba(83, 221, 205, 0.5);
-      color: #ffffff;
-    }
+  .content-area {
+    width: 100%; display: flex; justify-content: center;
+    padding: 96px 20px 60px;
+  }
+  .sheet { width: 100%; max-width: 680px; }
 
-    /* Glassmorphic Card */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    }
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px; margin-bottom: 24px;
+  }
+  h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+  .masthead span {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--teal-glow); background: rgba(45, 212, 191, 0.12);
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid rgba(45, 212, 191, 0.25);
+  }
 
-    .input-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-      margin-bottom: 16px;
-    }
+  .status-line {
+    font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;
+  }
+  .instruction-line {
+    font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px;
+  }
 
-    input[type="number"], input[type="text"] {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 15px;
-      outline: none;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      transition: border-color 0.2s;
-    }
+  /* Day Grid matching student details */
+  .day-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+    gap: 8px; margin-bottom: 24px;
+  }
+  .day-btn {
+    padding: 12px 8px; background: var(--glass-surface);
+    border: 1px solid var(--glass-border); border-radius: 12px;
+    color: var(--text-main); font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all .2s ease; text-align: center;
+  }
+  .day-btn.selected {
+    background: var(--teal-glow); color: #042f2e;
+    box-shadow: 0 0 16px rgba(45, 212, 191, 0.4);
+  }
+  .day-btn.completed:not(.selected) {
+    border-color: var(--teal-glow); color: var(--teal-glow);
+  }
 
-    input[type="number"]:focus, input[type="text"]:focus {
-      border-color: #53ddcd;
-    }
+  /* Glass Card Container */
+  .glass-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 22px;
+    box-shadow: 0 8px 32px var(--glass-glow);
+    margin-bottom: 24px;
+  }
 
-    .btn-glass {
-      background: rgba(83, 221, 205, 0.15);
-      color: #53ddcd;
-      border: 1px solid rgba(83, 221, 205, 0.4);
-      padding: 0 18px;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: all 0.2s ease;
-    }
+  .card-title {
+    font-size: 1.1rem; font-weight: 700; color: var(--teal-glow); margin-bottom: 14px;
+  }
 
-    .btn-glass:hover {
-      background: rgba(83, 221, 205, 0.25);
-    }
+  .field-label {
+    font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; display: block;
+  }
 
-    .subject-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+  .count-row {
+    display: flex; gap: 10px; margin-bottom: 18px;
+  }
 
-    .subject-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 6px 10px;
-      border-radius: 10px;
-    }
+  input[type="number"], input[type="text"] {
+    width: 100%; padding: 12px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px; color: var(--text-main);
+    font-family: inherit; font-size: 0.95rem; outline: none;
+    transition: border-color .2s;
+  }
+  input:focus {
+    border-color: var(--teal-glow);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.3);
+  }
 
-    .subject-number {
-      font-size: 14px;
-      font-weight: 700;
-      color: #53ddcd;
-      width: 22px;
-      text-align: center;
-    }
+  .btn-action {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    color: var(--teal-glow); padding: 0 18px;
+    border-radius: 12px; font-weight: 700; font-family: inherit;
+    cursor: pointer; white-space: nowrap; transition: background .2s;
+  }
+  .btn-action:hover {
+    background: rgba(45, 212, 191, 0.15);
+  }
 
-    .btn-remove {
-      background: rgba(239, 83, 80, 0.15);
-      color: #ef5350;
-      border: 1px solid rgba(239, 83, 80, 0.35);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+  .subject-list {
+    display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;
+  }
 
-    .btn-remove:hover {
-      background: rgba(239, 83, 80, 0.3);
-    }
+  .subject-row {
+    display: grid; grid-template-columns: 46px 1fr 44px; gap: 10px; align-items: center;
+  }
 
-    .btn-save-day {
-      width: 100%;
-      background: #53ddcd;
-      color: #071521;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      margin-top: 18px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(83, 221, 205, 0.3);
-      transition: opacity 0.2s;
-    }
+  .period-tag {
+    background: rgba(45, 212, 191, 0.12); color: var(--teal-glow);
+    border-radius: 8px; padding: 12px 0; text-align: center;
+    font-size: 0.8rem; font-weight: 700;
+  }
 
-    .btn-save-day:hover {
-      opacity: 0.92;
-    }
+  .btn-remove {
+    height: 44px;
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    color: var(--coral-glow);
+    border-radius: 10px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; transition: background .2s;
+  }
+  .btn-remove:hover {
+    background: rgba(248, 113, 113, 0.25);
+  }
 
-    .btn-submit-week {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      color: rgba(255, 255, 255, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: not-allowed;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: all 0.2s ease;
-    }
+  .primary-save-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px; font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+    transition: transform .15s ease;
+  }
+  .primary-save-btn:hover { transform: translateY(-1px); }
 
-    .btn-submit-week.ready {
-      background: #53ddcd;
-      color: #071521;
-      border: none;
-      box-shadow: 0 4px 20px rgba(83, 221, 205, 0.35);
-      cursor: pointer;
-    }
-  </style>
+  .submit-week-btn {
+    width: 100%; padding: 16px; border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted); border: 1px solid var(--glass-border);
+    font-weight: 800; font-size: 1rem; cursor: not-allowed;
+    transition: all .25s ease;
+  }
+  .submit-week-btn.ready {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+    cursor: pointer;
+  }
+</style>
 </head>
 <body>
 
-  <div class="header">
+<button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div>
+    <div class="brand">Student Dash</div>
+    <div class="brand-sub">daily companion</div>
+  </div>
+  <a class="nav-link" href="index.html"><span class="tag">H</span> Home</a>
+  <a class="nav-link active" href="buildweek.html"><span class="tag">B</span> Build Week</a>
+  <a class="nav-link" href="attendance.html"><span class="tag">A</span> Attendance</a>
+  <a class="nav-link" href="percentage.html"><span class="tag">P</span> Percentage</a>
+</nav>
+
+<main class="content-area">
+<div class="sheet">
+  <div class="masthead">
     <h1>Build Week</h1>
-    <span class="badge">TIMETABLE</span>
+    <span>TIMETABLE</span>
   </div>
 
-  <p class="status-text" id="status-counter">0 of 5 days added</p>
-  <p class="instruction-text">Pick a day to fill in subjects</p>
+  <div class="status-line" id="status-counter">0 of 5 days added</div>
+  <div class="instruction-line">Pick a day to configure subjects</div>
 
-  <div class="days-container" id="days-wrapper"></div>
+  <div class="day-grid" id="day-grid"></div>
 
-  <!-- Day Configuration Glass Card -->
-  <div class="glass-card" id="day-config-card">
-    <h3 id="selected-day-title" style="margin-bottom: 12px; color: #53ddcd;">Monday</h3>
+  <div class="glass-card">
+    <div class="card-title" id="selected-day-title">Monday</div>
     
-    <label style="font-size: 13px; color: #80cbc4;">Number of subjects:</label>
-    <div class="input-row">
+    <label class="field-label">Total number of subjects</label>
+    <div class="count-row">
       <input type="number" id="subject-count-input" min="1" max="12" placeholder="e.g. 5">
-      <button class="btn-glass" onclick="setSubjectCount()">Set Count</button>
+      <button class="btn-action" onclick="setSubjectCount()">Set Count</button>
     </div>
 
     <div class="subject-list" id="subject-list-container"></div>
 
-    <button class="btn-save-day" onclick="saveCurrentDay()">Save Day</button>
+    <button class="primary-save-btn" onclick="saveCurrentDay()">Save Day</button>
   </div>
 
-  <button class="btn-submit-week" id="btn-submit" onclick="submitWeeklySchedule()">Submit weekly schedule →</button>
+  <button class="submit-week-btn" id="btn-submit" onclick="submitWeeklySchedule()">Submit weekly schedule →</button>
+</div>
+</main>
 
-  <script>
-    // 1. Detect education level (Removes Saturday for UG/PG)
-    const userEducation = (localStorage.getItem('education_level') || 'UG').toUpperCase();
-    const isUGorPG = userEducation.includes('UG') || userEducation.includes('PG') || userEducation === 'BTECH' || userEducation === 'MTECH';
+<script>
+  const STORAGE_KEY = "timetableData";
+  const INFO_KEY = "studentInfo";
+
+  // Check stage from student details to exclude Saturday for UG / PG[cite: 3]
+  const studentInfo = JSON.parse(localStorage.getItem(INFO_KEY) || '{}');
+  const stage = (studentInfo.stage || '').toUpperCase();
+  const isUGorPG = stage === 'UG' || stage === 'PG';
+
+  const dayMap = {
+    'Mon': 'Monday', 'Tue': 'Tuesday', 'Wed': 'Wednesday',
+    'Thu': 'Thursday', 'Fri': 'Friday', 'Sat': 'Saturday'
+  };
+
+  const availableShortDays = isUGorPG 
+    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] 
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  let currentShortDay = availableShortDays[0];
+  let schedule = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  let currentSubjects = [];
+
+  function renderDayButtons() {
+    const grid = document.getElementById('day-grid');
+    grid.innerHTML = '';
+    let completedCount = 0;
+
+    availableShortDays.forEach(shortDay => {
+      const fullDay = dayMap[shortDay];
+      const hasData = schedule[fullDay] && schedule[fullDay].length > 0;
+      if (hasData) completedCount++;
+
+      const btn = document.createElement('button');
+      btn.className = `day-btn ${shortDay === currentShortDay ? 'selected' : ''} ${hasData ? 'completed' : ''}`;
+      btn.innerText = shortDay;
+      btn.onclick = () => selectDay(shortDay);
+      grid.appendChild(btn);
+    });
+
+    document.getElementById('status-counter').innerText = `${completedCount} of ${availableShortDays.length} days added`;
     
-    const availableDays = isUGorPG 
-      ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] 
-      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const submitBtn = document.getElementById('btn-submit');
+    if (completedCount === availableShortDays.length) {
+      submitBtn.classList.add('ready');
+    } else {
+      submitBtn.classList.remove('ready');
+    }
+  }
 
-    let currentDay = availableDays[0];
-    let schedule = JSON.parse(localStorage.getItem('weekly_schedule') || '{}');
-    let currentSubjects = [];
+  function selectDay(shortDay) {
+    currentShortDay = shortDay;
+    const fullDay = dayMap[shortDay];
+    document.getElementById('selected-day-title').innerText = fullDay;
+    
+    currentSubjects = schedule[fullDay] ? [...schedule[fullDay]] : [];
+    document.getElementById('subject-count-input').value = currentSubjects.length || '';
+    renderSubjects();
+    renderDayButtons();
+  }
 
-    // Render day selector buttons
-    function renderDays() {
-      const wrapper = document.getElementById('days-wrapper');
-      wrapper.innerHTML = '';
-      let completedCount = 0;
+  function setSubjectCount() {
+    const count = parseInt(document.getElementById('subject-count-input').value) || 0;
+    syncInputsToArray();
 
-      availableDays.forEach(day => {
-        const btn = document.createElement('button');
-        btn.className = `day-btn ${day === currentDay ? 'active' : ''} ${schedule[day] ? 'completed' : ''}`;
-        btn.innerText = day;
-        btn.onclick = () => selectDay(day);
-        wrapper.appendChild(btn);
-        if (schedule[day]) completedCount++;
-      });
-
-      document.getElementById('status-counter').innerText = `${completedCount} of ${availableDays.length} days added`;
-      
-      const submitBtn = document.getElementById('btn-submit');
-      if (completedCount === availableDays.length) {
-        submitBtn.classList.add('ready');
-      } else {
-        submitBtn.classList.remove('ready');
+    if (count > currentSubjects.length) {
+      while (currentSubjects.length < count) {
+        currentSubjects.push('');
       }
+    } else if (count < currentSubjects.length) {
+      currentSubjects = currentSubjects.slice(0, count);
     }
+    renderSubjects();
+  }
 
-    function selectDay(day) {
-      currentDay = day;
-      document.getElementById('selected-day-title').innerText = day;
-      currentSubjects = schedule[day] ? [...schedule[day]] : [];
-      document.getElementById('subject-count-input').value = currentSubjects.length || '';
-      renderSubjects();
-      renderDays();
-    }
-
-    function setSubjectCount() {
-      const count = parseInt(document.getElementById('subject-count-input').value) || 0;
-      syncInputsToArray();
-
-      if (count > currentSubjects.length) {
-        while (currentSubjects.length < count) {
-          currentSubjects.push('');
-        }
-      } else if (count < currentSubjects.length) {
-        currentSubjects = currentSubjects.slice(0, count);
+  function syncInputsToArray() {
+    const inputs = document.querySelectorAll('.subject-name-input');
+    inputs.forEach((input, index) => {
+      if (currentSubjects[index] !== undefined) {
+        currentSubjects[index] = input.value;
       }
-      renderSubjects();
+    });
+  }
+
+  function renderSubjects() {
+    const container = document.getElementById('subject-list-container');
+    container.innerHTML = '';
+
+    currentSubjects.forEach((subj, idx) => {
+      const row = document.createElement('div');
+      row.className = 'subject-row';
+
+      row.innerHTML = `
+        <div class="period-tag">P${idx + 1}</div>
+        <input type="text" class="subject-name-input" value="${subj}" placeholder="Subject ${idx + 1} name" oninput="currentSubjects[${idx}] = this.value">
+        <button type="button" class="btn-remove" onclick="removeSubject(${idx})">✕</button>
+      `;
+      container.appendChild(row);
+    });
+
+    document.getElementById('subject-count-input').value = currentSubjects.length;
+  }
+
+  function removeSubject(index) {
+    syncInputsToArray();
+    currentSubjects.splice(index, 1);
+    renderSubjects();
+  }
+
+  function saveCurrentDay() {
+    syncInputsToArray();
+    const valid = currentSubjects.filter(s => s.trim() !== '');
+    
+    if (valid.length === 0) {
+      alert('Please add at least one subject before saving this day.');
+      return;
     }
 
-    function syncInputsToArray() {
-      const inputs = document.querySelectorAll('.subject-name-input');
-      inputs.forEach((input, index) => {
-        if (currentSubjects[index] !== undefined) {
-          currentSubjects[index] = input.value;
-        }
-      });
+    const fullDay = dayMap[currentShortDay];
+    schedule[fullDay] = valid;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+    renderDayButtons();
+    alert(`${fullDay} schedule saved!`);
+  }
+
+  function submitWeeklySchedule() {
+    const fullDays = availableShortDays.map(s => dayMap[s]);
+    const completed = fullDays.filter(day => schedule[day] && schedule[day].length > 0).length;
+    
+    if (completed < availableShortDays.length) {
+      alert(`Please complete all ${availableShortDays.length} days before submitting.`);
+      return;
+    }
+    window.location.href = 'attendance.html';
+  }
+
+  selectDay(availableShortDays[0]);
+</script>
+
+<script>
+  (function(){
+    const hamburger = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar(){
+      sidebar.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      overlay.classList.toggle('open');
     }
 
-    function renderSubjects() {
-      const container = document.getElementById('subject-list-container');
-      container.innerHTML = '';
+    hamburger.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+  })();
+</script>
 
-      currentSubjects.forEach((subj, idx) => {
-        const row = document.createElement('div');
-        row.className = 'subject-item';
-
-        row.innerHTML = `
-          <span class="subject-number">${idx + 1}</span>
-          <input type="text" class="subject-name-input" value="${subj}" placeholder="Subject ${idx + 1} name" oninput="currentSubjects[${idx}] = this.value">
-          <button type="button" class="btn-remove" onclick="removeSubject(${idx})">✕</button>
-        `;
-        container.appendChild(row);
-      });
-
-      document.getElementById('subject-count-input').value = currentSubjects.length;
-    }
-
-    function removeSubject(index) {
-      syncInputsToArray();
-      currentSubjects.splice(index, 1);
-      renderSubjects();
-    }
-
-    function saveCurrentDay() {
-      syncInputsToArray();
-      const validSubjects = currentSubjects.filter(s => s.trim() !== '');
-      
-      if (validSubjects.length === 0) {
-        alert('Please add at least one subject before saving this day.');
-        return;
-      }
-
-      schedule[currentDay] = validSubjects;
-      localStorage.setItem('weekly_schedule', JSON.stringify(schedule));
-      renderDays();
-      alert(`${currentDay} schedule saved!`);
-    }
-
-    function submitWeeklySchedule() {
-      const completedCount = Object.keys(schedule).filter(k => availableDays.includes(k)).length;
-      if (completedCount < availableDays.length) {
-        alert(`Please complete all ${availableDays.length} days before submitting.`);
-        return;
-      }
-      window.location.href = '/attendance.html';
-    }
-
-    selectDay(availableDays[0]);
-  </script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
-    }
-  </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+</script>
 </body>
 </html>
