@@ -4,20 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Home — Student Dashboard</title>
-<!-- Android / Chrome Manifest -->
 <link rel="manifest" href="/manifest.json">
-
-<!-- App Name for iOS -->
 <meta name="apple-mobile-web-app-title" content="StudentDiary">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-<!-- App Icon for iOS Safari -->
 <link rel="apple-touch-icon" href="/icon-512.png">
-
-<!-- Browser Favicon -->
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
  :root {
     --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
@@ -41,82 +35,36 @@
     background-attachment: fixed;
   }
 
-  /* Hamburger Base Button */
   .hamburger-btn {
-    position: fixed;
-    top: 24px;
-    left: 20px;
-    z-index: 70;
-    width: 44px;
-    height: 44px;
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    background: var(--glass-surface);
-    backdrop-filter: blur(12px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    cursor: pointer;
-    /* Smooth sliding animation */
+    position: fixed; top: 24px; left: 20px; z-index: 70;
+    width: 44px; height: 44px; border: 1px solid var(--glass-border);
+    border-radius: 12px; background: var(--glass-surface);
+    backdrop-filter: blur(12px); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px; cursor: pointer;
     transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
   }
-
-  /* Moves the button to the right side of the 250px sidebar when opened */
-  .hamburger-btn.open {
-    transform: translateX(170px);
-    margin-top:10px;
-  }
-
-  /* Hamburger lines */
+  .hamburger-btn.open { transform: translateX(170px); margin-top: 10px; }
   .hamburger-btn span {
-    width: 20px;
-    height: 2px;
-    background: var(--text-main);
-    border-radius: 2px;
-    transition: transform .25s ease, opacity .2s ease;
-  }
-
-  /* Cross icon transforms */
-  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
-  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-  .hamburger-btn span {
-    width: 20px; height: 2px;
-    background: var(--text-main);
-    border-radius: 2px;
-    transition: transform .25s ease, opacity .2s ease;
+    width: 20px; height: 2px; background: var(--text-main);
+    border-radius: 2px; transition: transform .25s ease, opacity .2s ease;
   }
   .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .hamburger-btn.open span:nth-child(2) { opacity: 0; }
   .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
   .sidebar-overlay {
-    position: fixed; inset: 0;
-    background: rgba(10, 15, 29, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 60; opacity: 0; pointer-events: none;
+    position: fixed; inset: 0; background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px); z-index: 60; opacity: 0; pointer-events: none;
     transition: opacity .25s ease;
   }
   .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
 
- .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid var(--glass-border);
-    padding: 36px 20px 20px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 65;
-    transform: translateX(-100%);
+  .sidebar {
+    position: fixed; top: 0; left: 0; height: 100vh; width: 250px;
+    background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px; display: flex; flex-direction: column;
+    gap: 8px; z-index: 65; transform: translateX(-100%);
     transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .sidebar.open { transform: translateX(0); }
@@ -152,7 +100,7 @@
   .masthead {
     display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 16px; margin-bottom: 28px;
+    padding-bottom: 16px; margin-bottom: 24px;
   }
   h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
   .masthead span {
@@ -160,6 +108,22 @@
     color: var(--teal-glow); background: rgba(45, 212, 191, 0.12);
     padding: 5px 12px; border-radius: 20px;
     border: 1px solid rgba(45, 212, 191, 0.25);
+  }
+
+  /* Centered Profile Avatar Area */
+  .profile-avatar-center {
+    display: flex; justify-content: center; align-items: center;
+    margin-bottom: 20px;
+  }
+  .avatar-circle {
+    width: 90px; height: 90px; border-radius: 50%;
+    border: 2px solid var(--teal-glow); padding: 3px;
+    background: var(--glass-surface); box-shadow: 0 0 25px rgba(45, 212, 191, 0.35);
+    overflow: hidden;
+  }
+  .avatar-img {
+    width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+    display: block;
   }
 
   .profile-card {
@@ -171,7 +135,7 @@
     box-shadow: 0 8px 32px var(--glass-glow);
   }
   .profile-row {
-    display: grid; grid-template-columns: 160px 1fr;
+    display: grid; grid-template-columns: 140px 1fr;
     padding: 16px 22px; border-bottom: 1px solid var(--glass-border);
     font-size: 0.95rem;
   }
@@ -257,7 +221,15 @@
     </div>
 
     <div id="filled-state" class="hidden">
+      <!-- Centered Circular Profile Photo -->
+      <div class="profile-avatar-center">
+        <div class="avatar-circle">
+          <img id="home-avatar-img" class="avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile Photo">
+        </div>
+      </div>
+
       <div class="profile-card" id="profile-card"></div>
+      
       <div class="profile-actions">
         <a class="ghost" href="details.html">Edit details</a>
         <a class="primary" href="buildweek.html">Build week →</a>
@@ -292,11 +264,16 @@
   const emptyState = document.getElementById('empty-state');
   const filledState = document.getElementById('filled-state');
   const profileCard = document.getElementById('profile-card');
+  const homeAvatarImg = document.getElementById('home-avatar-img');
 
   if (!info || !info.name) {
     emptyState.classList.remove('hidden');
   } else {
     filledState.classList.remove('hidden');
+
+    if (info.avatar) {
+      homeAvatarImg.src = info.avatar;
+    }
 
     const rows = [
       ['Name', info.name],
@@ -330,13 +307,7 @@
     overlay.addEventListener('click', toggleSidebar);
   })();
 </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
-    });
-  }
-</script>
+
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
