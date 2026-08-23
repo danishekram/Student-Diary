@@ -32,69 +32,36 @@
     background-attachment: fixed;
   }
 
-  /* Hamburger Base Button */
   .hamburger-btn {
-    position: fixed;
-    top: 24px;
-    left: 20px;
-    z-index: 70;
-    width: 44px;
-    height: 44px;
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    background: var(--glass-surface);
-    backdrop-filter: blur(12px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    cursor: pointer;
+    position: fixed; top: 24px; left: 20px; z-index: 70;
+    width: 44px; height: 44px; border: 1px solid var(--glass-border);
+    border-radius: 12px; background: var(--glass-surface);
+    backdrop-filter: blur(12px); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px; cursor: pointer;
     transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
   }
-
-  .hamburger-btn.open {
-    transform: translateX(170px);
-    margin-top: 10px;
-  }
-
+  .hamburger-btn.open { transform: translateX(170px); margin-top: 10px; }
   .hamburger-btn span {
-    width: 20px;
-    height: 2px;
-    background: var(--text-main);
-    border-radius: 2px;
-    transition: transform .25s ease, opacity .2s ease;
+    width: 20px; height: 2px; background: var(--text-main);
+    border-radius: 2px; transition: transform .25s ease, opacity .2s ease;
   }
-
   .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .hamburger-btn.open span:nth-child(2) { opacity: 0; }
   .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
   .sidebar-overlay {
-    position: fixed; inset: 0;
-    background: rgba(10, 15, 29, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 60; opacity: 0; pointer-events: none;
+    position: fixed; inset: 0; background: rgba(10, 15, 29, 0.6);
+    backdrop-filter: blur(4px); z-index: 60; opacity: 0; pointer-events: none;
     transition: opacity .25s ease;
   }
   .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
 
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid var(--glass-border);
-    padding: 36px 20px 20px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 65;
-    transform: translateX(-100%);
+    position: fixed; top: 0; left: 0; height: 100vh; width: 250px;
+    background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--glass-border);
+    padding: 36px 20px 20px 20px; display: flex; flex-direction: column;
+    gap: 8px; z-index: 65; transform: translateX(-100%);
     transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .sidebar.open { transform: translateX(0); }
@@ -141,13 +108,16 @@
   }
 
   .overall-banner {
-    display: flex; align-items: center; gap: 16px;
+    display: flex; flex-direction: column; gap: 12px;
     background: var(--glass-surface);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
-    border-radius: 20px; padding: 24px;
+    border-radius: 20px; padding: 22px;
     box-shadow: 0 8px 32px var(--glass-glow);
     margin-bottom: 24px;
+  }
+  .overall-top {
+    display: flex; align-items: center; justify-content: space-between;
   }
   .overall-banner .ov-label {
     font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
@@ -160,18 +130,33 @@
   .overall-banner .ov-pct.warn { color: var(--amber-glow); }
   .overall-banner .ov-pct.bad { color: var(--coral-glow); }
   .overall-banner .ov-detail {
-    margin-left: auto; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;
+    font-size: 0.85rem; color: var(--text-muted); font-weight: 600;
   }
 
-  /* Interactive Subject Card */
+  /* Predictor Badge */
+  .cutoff-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 12px;
+    font-size: 0.82rem; font-weight: 600;
+  }
+  .cutoff-pill.bunk {
+    background: rgba(45, 212, 191, 0.12);
+    color: var(--teal-glow);
+    border: 1px solid rgba(45, 212, 191, 0.3);
+  }
+  .cutoff-pill.goal {
+    background: rgba(248, 113, 113, 0.12);
+    color: var(--coral-glow);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+  }
+
   .subject-card {
     background: var(--glass-surface);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 16px; padding: 18px 22px;
     margin-bottom: 14px; transition: transform .2s ease, border-color .2s ease;
-    cursor: pointer;
-    user-select: none;
+    cursor: pointer; user-select: none;
   }
   .subject-card:hover { 
     transform: translateY(-2px); 
@@ -184,7 +169,7 @@
 
   .subject-top {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   .subject-name { 
     font-size: 0.95rem; font-weight: 700; 
@@ -207,7 +192,7 @@
   .bar-track {
     width: 100%; height: 8px;
     background: rgba(255, 255, 255, 0.08);
-    border-radius: 20px; overflow: hidden; margin-bottom: 8px;
+    border-radius: 20px; overflow: hidden; margin-bottom: 12px;
   }
   .bar-fill { height: 100%; border-radius: 20px; transition: width .6s ease; }
   .bar-fill.good { background: var(--teal-glow); box-shadow: 0 0 12px var(--teal-glow); }
@@ -217,21 +202,17 @@
   .subject-footer {
     display: flex; justify-content: space-between; align-items: center;
     font-size: 0.8rem; color: var(--text-muted);
+    margin-top: 10px;
   }
   .tap-hint { font-size: 0.75rem; color: var(--teal-glow); }
 
-  /* Accordion Detailed Log */
   .history-container {
     display: none;
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 16px; padding-top: 14px;
     border-top: 1px solid var(--glass-border);
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: column; gap: 8px;
   }
-  .subject-card.expanded .history-container {
-    display: flex;
-  }
+  .subject-card.expanded .history-container { display: flex; }
 
   .history-row {
     display: flex; justify-content: space-between; align-items: center;
@@ -240,7 +221,6 @@
     font-size: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.05);
   }
   .history-date { color: var(--text-main); font-weight: 500; }
-  
   .status-badge {
     padding: 3px 10px; border-radius: 6px;
     font-size: 0.75rem; font-weight: 700;
@@ -256,7 +236,7 @@
 
   .legend {
     margin-top: 24px; font-size: 0.8rem; color: var(--text-muted);
-    display: flex; gap: 20px; font-weight: 600;
+    display: flex; gap: 20px; font-weight: 600; flex-wrap: wrap;
   }
   .legend span { display: flex; align-items: center; gap: 8px; }
   .legend .dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -293,27 +273,39 @@
 <div class="sheet">
   <div class="masthead">
     <h1>Attendance Percentage</h1>
-    <span>per subject</span>
+    <span id="cutoff-target-badge">75% Cutoff</span>
   </div>
 
   <div id="overall-banner" class="overall-banner hidden">
-    <span class="ov-label">Overall</span>
-    <span class="ov-pct" id="overall-pct">—</span>
-    <span class="ov-detail" id="overall-detail">—</span>
+    <div class="overall-top">
+      <div>
+        <div class="ov-label">Overall Attendance</div>
+        <div class="ov-pct" id="overall-pct">—</div>
+      </div>
+      <div class="ov-detail" id="overall-detail">—</div>
+    </div>
+    <div class="cutoff-pill" id="overall-predictor"></div>
   </div>
 
   <div id="empty-note" class="empty-note hidden">
-    No attendance submitted yet. Go to <a href="attendance.html" style="color:var(--teal-glow);">Attendance</a> and submit at least one day to see percentages and breakdown logs here.
+    No attendance submitted yet. Go to <a href="attendance.html" style="color:var(--teal-glow);">Attendance</a> and submit at least one day to see stats.
   </div>
 
   <div id="subject-list"></div>
-
   <div class="legend" id="legend"></div>
 </div>
 </main>
 
 <script>
   const LOG_KEY = "attendanceLog";
+  const INFO_KEY = "studentInfo";
+
+  const studentInfo = JSON.parse(localStorage.getItem(INFO_KEY) || '{}');
+  const stage = (studentInfo.stage || '').toUpperCase();
+  const isUGorPG = stage === 'UG' || stage === 'PG';
+  const TARGET_PCT = isUGorPG ? 75 : 80;
+
+  document.getElementById('cutoff-target-badge').textContent = `${TARGET_PCT}% Target`;
 
   function loadLog() {
     try {
@@ -324,9 +316,29 @@
   }
 
   function statusClass(pct) {
-    if (pct >= 75) return 'good';
-    if (pct >= 60) return 'warn';
+    if (pct >= TARGET_PCT) return 'good';
+    if (pct >= (TARGET_PCT - 15)) return 'warn';
     return 'bad';
+  }
+
+  function getPrediction(present, total) {
+    if (total === 0) return { text: "No classes recorded yet", type: "bunk" };
+    const requiredRatio = TARGET_PCT / 100;
+    const currentPct = (present / total) * 100;
+
+    if (currentPct >= TARGET_PCT) {
+      const maxBunks = Math.floor((present - requiredRatio * total) / requiredRatio);
+      return {
+        text: maxBunks > 0 ? `Safe to miss next ${maxBunks} class${maxBunks > 1 ? 'es' : ''}` : `On track. Missing next class drops below ${TARGET_PCT}%`,
+        type: "bunk"
+      };
+    } else {
+      const need = Math.ceil((requiredRatio * total - present) / (1 - requiredRatio));
+      return {
+        text: `Must attend next ${need} consecutive class${need > 1 ? 'es' : ''} for ${TARGET_PCT}%`,
+        type: "goal"
+      };
+    }
   }
 
   function formatDate(isoStr) {
@@ -345,13 +357,11 @@
   const overallBanner = document.getElementById('overall-banner');
   const overallPct = document.getElementById('overall-pct');
   const overallDetail = document.getElementById('overall-detail');
+  const overallPredictor = document.getElementById('overall-predictor');
   const legend = document.getElementById('legend');
 
-  // Aggregate data and history logs per subject
   const totals = {};
   const history = {};
-
-  // Sort dates chronologically descending (latest dates first)
   const sortedDateKeys = Object.keys(log).sort().reverse();
 
   sortedDateKeys.forEach(dateKey => {
@@ -382,13 +392,14 @@
   } else {
     let grandPresent = 0, grandTotal = 0;
 
-    subjectListEl.innerHTML = subjectNames.map((name, index) => {
+    subjectListEl.innerHTML = subjectNames.map((name) => {
       const { present, total } = totals[name];
       const pct = total ? Math.round((present / total) * 100) : 0;
       const cls = statusClass(pct);
       grandPresent += present;
       grandTotal += total;
 
+      const prediction = getPrediction(present, total);
       const records = history[name] || [];
       const historyRows = records.map(rec => `
         <div class="history-row">
@@ -409,11 +420,13 @@
           <div class="bar-track">
             <div class="bar-fill ${cls}" style="width:${pct}%;"></div>
           </div>
+          <div class="cutoff-pill ${prediction.type}">
+            ${prediction.text}
+          </div>
           <div class="subject-footer">
-            <span>${present} present of ${total} classes</span>
+            <span>${present} of ${total} attended</span>
             <span class="tap-hint">Tap for dates</span>
           </div>
-
           <div class="history-container">
             ${historyRows}
           </div>
@@ -425,12 +438,16 @@
     overallPct.textContent = `${overallPercent}%`;
     overallPct.className = `ov-pct ${statusClass(overallPercent)}`;
     overallDetail.textContent = `${grandPresent} / ${grandTotal} classes attended`;
+    
+    const ovPred = getPrediction(grandPresent, grandTotal);
+    overallPredictor.className = `cutoff-pill ${ovPred.type}`;
+    overallPredictor.textContent = ovPred.text;
     overallBanner.classList.remove('hidden');
 
     legend.innerHTML = `
-      <span><span class="dot good"></span> ≥75%</span>
-      <span><span class="dot warn"></span> 60–74%</span>
-      <span><span class="dot bad"></span> below 60%</span>
+      <span><span class="dot good"></span> ≥${TARGET_PCT}% (Safe)</span>
+      <span><span class="dot warn"></span> ${TARGET_PCT - 15}–${TARGET_PCT - 1}%</span>
+      <span><span class="dot bad"></span> below ${TARGET_PCT - 15}%</span>
     `;
   }
 
@@ -448,13 +465,11 @@
     const hamburger = document.getElementById('hamburger-btn');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
-
     function toggleSidebar(){
       sidebar.classList.toggle('open');
       hamburger.classList.toggle('open');
       overlay.classList.toggle('open');
     }
-
     hamburger.addEventListener('click', toggleSidebar);
     overlay.addEventListener('click', toggleSidebar);
   })();

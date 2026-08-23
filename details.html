@@ -19,6 +19,7 @@
     --text-muted: #94a3b8;
     --teal-glow: #2dd4bf;
     --coral-glow: #f87171;
+    --amber-glow: #fbbf24;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -165,9 +166,7 @@
     width: 100%; margin-top: 18px; display: flex; align-items: center; gap: 12px;
   }
   .zoom-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
-  .zoom-slider {
-    flex: 1; accent-color: var(--teal-glow); cursor: pointer;
-  }
+  .zoom-slider { flex: 1; accent-color: var(--teal-glow); cursor: pointer; }
 
   .crop-actions { display: flex; gap: 10px; width: 100%; margin-top: 20px; }
   .crop-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.9rem; }
@@ -218,6 +217,38 @@
     color: var(--text-main); padding: 14px 20px; border-radius: 12px;
     font-weight: 600; cursor: pointer;
   }
+
+  /* Data Backup Box */
+  .backup-box {
+    margin-top: 36px; padding: 22px;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-glow);
+  }
+  .backup-box h2 {
+    font-size: 1.1rem; font-weight: 700; color: var(--teal-glow); margin-bottom: 6px;
+  }
+  .backup-box p {
+    font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;
+  }
+  .backup-btn-group {
+    display: flex; gap: 12px;
+  }
+  .btn-backup {
+    flex: 1; padding: 12px; border-radius: 10px; font-weight: 700;
+    cursor: pointer; font-size: 0.85rem; text-align: center;
+  }
+  .btn-export {
+    background: rgba(45, 212, 191, 0.15); color: var(--teal-glow);
+    border: 1px solid rgba(45, 212, 191, 0.4);
+  }
+  .btn-import {
+    background: rgba(251, 191, 36, 0.15); color: var(--amber-glow);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+  }
+  #import-file-input { display: none; }
+
   .field { margin-bottom: 16px; }
   .error { color: var(--coral-glow); font-size: 0.8rem; font-weight: 600; display: none; }
   .hint { color: var(--text-muted); font-size: 0.8rem; margin-top: -10px; margin-bottom: 14px; }
@@ -298,6 +329,17 @@
         <button type="button" class="ghost" id="reset-btn">Clear</button>
       </div>
     </form>
+
+    <!-- Data Backup & Restore Box -->
+    <div class="backup-box">
+      <h2>Data Backup & Transfer</h2>
+      <p>Export your full schedule, attendance log, and profile as a JSON file, or restore from a previous backup.</p>
+      <div class="backup-btn-group">
+        <button type="button" class="btn-backup btn-export" onclick="exportDataBackup()">Export JSON Backup</button>
+        <label for="import-file-input" class="btn-backup btn-import">Import JSON Backup</label>
+        <input type="file" id="import-file-input" accept=".json" onchange="importDataBackup(event)">
+      </div>
+    </div>
   </div>
 </main>
 
@@ -325,6 +367,8 @@
 
 <script>
   const STORAGE_KEY = "studentInfo";
+  const TIMETABLE_KEY = "timetableData";
+  const LOG_KEY = "attendanceLog";
   const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
   const stageGrid = document.getElementById('stage-grid');
@@ -339,7 +383,6 @@
   const avatarInput = document.getElementById('avatar-input');
   const avatarPreview = document.getElementById('avatar-preview');
 
-  // Crop elements
   const cropModal = document.getElementById('crop-modal');
   const cropContainer = document.getElementById('crop-container');
   const cropImg = document.getElementById('crop-img');
@@ -350,7 +393,6 @@
   let selectedStage = null;
   let currentAvatarData = '';
 
-  // Interactive Pan / Zoom state
   let imgX = 0, imgY = 0;
   let scale = 1;
   let baseWidth = 0, baseHeight = 0;
@@ -368,7 +410,6 @@
         const nw = cropImg.naturalWidth;
         const nh = cropImg.naturalHeight;
         
-        // Fit cover to 240px container
         const ratio = Math.max(C_SIZE / nw, C_SIZE / nh);
         baseWidth = nw * ratio;
         baseHeight = nh * ratio;
@@ -394,7 +435,6 @@
     cropImg.style.transform = `translate(${imgX}px, ${imgY}px) scale(${scale})`;
   }
 
-  // Pointer drag logic for touch & mouse
   function onPointerDown(e) {
     isDragging = true;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -438,7 +478,6 @@
     canvas.height = OUTPUT_SIZE;
     const ctx = canvas.getContext('2d');
 
-    // Circular crop path
     ctx.beginPath();
     ctx.arc(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, 0, Math.PI * 2);
     ctx.closePath();
@@ -526,6 +565,46 @@
     semesterField.classList.add('hidden');
     stageError.style.display = 'none';
   });
+
+  // Backup Export Feature
+  function exportDataBackup() {
+    const backupData = {
+      studentInfo: JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'),
+      timetableData: JSON.parse(localStorage.getItem(TIMETABLE_KEY) || '{}'),
+      attendanceLog: JSON.parse(localStorage.getItem(LOG_KEY) || '{}'),
+      exportDate: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `student_diary_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Backup Import Feature
+  function importDataBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (imported.studentInfo) localStorage.setItem(STORAGE_KEY, JSON.stringify(imported.studentInfo));
+        if (imported.timetableData) localStorage.setItem(TIMETABLE_KEY, JSON.stringify(imported.timetableData));
+        if (imported.attendanceLog) localStorage.setItem(LOG_KEY, JSON.stringify(imported.attendanceLog));
+
+        alert('Backup successfully restored! Refreshing page...');
+        window.location.reload();
+      } catch (err) {
+        alert('Invalid JSON backup file.');
+      }
+    };
+    reader.readAsText(file);
+  }
 </script>
 
 <script>
@@ -533,13 +612,11 @@
     const hamburger = document.getElementById('hamburger-btn');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
-
     function toggleSidebar(){
       sidebar.classList.toggle('open');
       hamburger.classList.toggle('open');
       overlay.classList.toggle('open');
     }
-
     hamburger.addEventListener('click', toggleSidebar);
     overlay.addEventListener('click', toggleSidebar);
   })();
