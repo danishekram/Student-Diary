@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance Percentage</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-512.png">
+
 <style>
  :root {
     --bg-gradient: radial-gradient(circle at 20% 20%, #1e293b 0%, #0a0f1d 100%);
@@ -28,7 +32,7 @@
     background-attachment: fixed;
   }
 
- /* Hamburger Base Button */
+  /* Hamburger Base Button */
   .hamburger-btn {
     position: fixed;
     top: 24px;
@@ -46,17 +50,14 @@
     justify-content: center;
     gap: 5px;
     cursor: pointer;
-    /* Smooth sliding animation */
     transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s ease;
   }
 
-  /* Moves the button to the right side of the 250px sidebar when opened */
   .hamburger-btn.open {
     transform: translateX(170px);
-    margin-top:10px;
+    margin-top: 10px;
   }
 
-  /* Hamburger lines */
   .hamburger-btn span {
     width: 20px;
     height: 2px;
@@ -65,16 +66,6 @@
     transition: transform .25s ease, opacity .2s ease;
   }
 
-  /* Cross icon transforms */
-  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
-  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-  .hamburger-btn span {
-    width: 20px; height: 2px;
-    background: var(--text-main);
-    border-radius: 2px;
-    transition: transform .25s ease, opacity .2s ease;
-  }
   .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .hamburger-btn.open span:nth-child(2) { opacity: 0; }
   .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -172,19 +163,42 @@
     margin-left: auto; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;
   }
 
+  /* Interactive Subject Card */
   .subject-card {
     background: var(--glass-surface);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 16px; padding: 18px 22px;
-    margin-bottom: 14px; transition: transform .2s ease;
+    margin-bottom: 14px; transition: transform .2s ease, border-color .2s ease;
+    cursor: pointer;
+    user-select: none;
   }
-  .subject-card:hover { transform: translateY(-2px); }
+  .subject-card:hover { 
+    transform: translateY(-2px); 
+    border-color: rgba(45, 212, 191, 0.3);
+  }
+  .subject-card.expanded {
+    border-color: var(--teal-glow);
+    box-shadow: 0 0 20px rgba(45, 212, 191, 0.15);
+  }
+
   .subject-top {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 12px;
   }
-  .subject-name { font-size: 0.95rem; font-weight: 700; }
+  .subject-name { 
+    font-size: 0.95rem; font-weight: 700; 
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toggle-arrow {
+    font-size: 0.75rem; color: var(--text-muted);
+    transition: transform .25s ease;
+  }
+  .subject-card.expanded .toggle-arrow {
+    transform: rotate(180deg);
+    color: var(--teal-glow);
+  }
+
   .subject-pct { font-size: 1rem; font-weight: 800; }
   .subject-pct.good { color: var(--teal-glow); }
   .subject-pct.warn { color: var(--amber-glow); }
@@ -199,7 +213,46 @@
   .bar-fill.good { background: var(--teal-glow); box-shadow: 0 0 12px var(--teal-glow); }
   .bar-fill.warn { background: var(--amber-glow); box-shadow: 0 0 12px var(--amber-glow); }
   .bar-fill.bad { background: var(--coral-glow); box-shadow: 0 0 12px var(--coral-glow); }
-  .subject-meta { font-size: 0.8rem; color: var(--text-muted); }
+  
+  .subject-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.8rem; color: var(--text-muted);
+  }
+  .tap-hint { font-size: 0.75rem; color: var(--teal-glow); }
+
+  /* Accordion Detailed Log */
+  .history-container {
+    display: none;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--glass-border);
+    flex-direction: column;
+    gap: 8px;
+  }
+  .subject-card.expanded .history-container {
+    display: flex;
+  }
+
+  .history-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .history-date { color: var(--text-main); font-weight: 500; }
+  
+  .status-badge {
+    padding: 3px 10px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .status-badge.present {
+    background: rgba(45, 212, 191, 0.15); color: var(--teal-glow);
+    border: 1px solid rgba(45, 212, 191, 0.3);
+  }
+  .status-badge.absent {
+    background: rgba(248, 113, 113, 0.15); color: var(--coral-glow);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+  }
 
   .legend {
     margin-top: 24px; font-size: 0.8rem; color: var(--text-muted);
@@ -210,6 +263,7 @@
   .legend .good { background: var(--teal-glow); }
   .legend .warn { background: var(--amber-glow); }
   .legend .bad { background: var(--coral-glow); }
+  
   .empty-note {
     background: var(--glass-surface); border: 1px dashed var(--coral-glow);
     border-radius: 16px; padding: 20px; color: var(--coral-glow); font-weight: 600;
@@ -249,7 +303,7 @@
   </div>
 
   <div id="empty-note" class="empty-note hidden">
-    No attendance submitted yet. Go to <a href="attendance.html" style="color:var(--flag);">Attendance</a> and submit at least one day to see percentages here.
+    No attendance submitted yet. Go to <a href="attendance.html" style="color:var(--teal-glow);">Attendance</a> and submit at least one day to see percentages and breakdown logs here.
   </div>
 
   <div id="subject-list"></div>
@@ -275,6 +329,16 @@
     return 'bad';
   }
 
+  function formatDate(isoStr) {
+    try {
+      const [year, month, day] = isoStr.split('-');
+      const d = new Date(year, parseInt(month) - 1, day);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+      return isoStr;
+    }
+  }
+
   const log = loadLog();
   const emptyNote = document.getElementById('empty-note');
   const subjectListEl = document.getElementById('subject-list');
@@ -283,13 +347,31 @@
   const overallDetail = document.getElementById('overall-detail');
   const legend = document.getElementById('legend');
 
-  // Aggregate: subjectName -> { present, total }
+  // Aggregate data and history logs per subject
   const totals = {};
-  Object.values(log).forEach(dayEntry => {
+  const history = {};
+
+  // Sort dates chronologically descending (latest dates first)
+  const sortedDateKeys = Object.keys(log).sort().reverse();
+
+  sortedDateKeys.forEach(dateKey => {
+    const dayEntry = log[dateKey];
     Object.values(dayEntry).forEach(({ subject, status }) => {
-      if (!totals[subject]) totals[subject] = { present: 0, total: 0 };
+      if (!subject) return;
+
+      if (!totals[subject]) {
+        totals[subject] = { present: 0, total: 0 };
+        history[subject] = [];
+      }
+
       totals[subject].total += 1;
       if (status === 'present') totals[subject].present += 1;
+
+      history[subject].push({
+        date: dateKey,
+        formattedDate: formatDate(dateKey),
+        status: status
+      });
     });
   });
 
@@ -300,23 +382,41 @@
   } else {
     let grandPresent = 0, grandTotal = 0;
 
-    subjectListEl.innerHTML = subjectNames.map(name => {
+    subjectListEl.innerHTML = subjectNames.map((name, index) => {
       const { present, total } = totals[name];
       const pct = total ? Math.round((present / total) * 100) : 0;
       const cls = statusClass(pct);
       grandPresent += present;
       grandTotal += total;
 
+      const records = history[name] || [];
+      const historyRows = records.map(rec => `
+        <div class="history-row">
+          <span class="history-date">${rec.formattedDate}</span>
+          <span class="status-badge ${rec.status}">${rec.status.toUpperCase()}</span>
+        </div>
+      `).join('');
+
       return `
-        <div class="subject-card">
+        <div class="subject-card" onclick="toggleSubjectCard(this)">
           <div class="subject-top">
-            <div class="subject-name">${name}</div>
+            <div class="subject-name">
+              <span>${name}</span>
+              <span class="toggle-arrow">▼</span>
+            </div>
             <div class="subject-pct ${cls}">${pct}%</div>
           </div>
           <div class="bar-track">
             <div class="bar-fill ${cls}" style="width:${pct}%;"></div>
           </div>
-          <div class="subject-meta">${present} present of ${total} classes</div>
+          <div class="subject-footer">
+            <span>${present} present of ${total} classes</span>
+            <span class="tap-hint">Tap for dates</span>
+          </div>
+
+          <div class="history-container">
+            ${historyRows}
+          </div>
         </div>
       `;
     }).join('');
@@ -332,6 +432,14 @@
       <span><span class="dot warn"></span> 60–74%</span>
       <span><span class="dot bad"></span> below 60%</span>
     `;
+  }
+
+  function toggleSubjectCard(cardEl) {
+    cardEl.classList.toggle('expanded');
+    const hint = cardEl.querySelector('.tap-hint');
+    if (hint) {
+      hint.textContent = cardEl.classList.contains('expanded') ? 'Tap to collapse' : 'Tap for dates';
+    }
   }
 </script>
 
@@ -351,6 +459,7 @@
     overlay.addEventListener('click', toggleSidebar);
   })();
 </script>
+
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
