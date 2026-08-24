@@ -19,6 +19,7 @@
     --text-muted: #94a3b8;
     --teal-glow: #2dd4bf;
     --coral-glow: #f87171;
+    --amber-glow: #fbbf24;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -106,7 +107,7 @@
 
   /* Date Switcher Glass Banner */
   .date-switcher-banner {
-    display: flex; flex-direction: column; gap: 12px;
+    display: flex; flex-direction: column; gap: 14px;
     padding: 18px 20px; border-radius: 16px;
     background: var(--glass-surface);
     backdrop-filter: blur(16px);
@@ -118,7 +119,7 @@
     display: flex; justify-content: space-between; align-items: center;
   }
   .day-badge-title {
-    font-size: 1.15rem; font-weight: 700; color: var(--text-main);
+    font-size: 1.1rem; font-weight: 700; color: var(--text-main);
   }
   .today-tag {
     font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
@@ -139,6 +140,25 @@
     filter: invert(1); cursor: pointer;
   }
 
+  /* Holiday Active Card */
+  .holiday-banner-card {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 20px; padding: 28px 20px; text-align: center;
+    backdrop-filter: blur(16px); margin-bottom: 24px;
+  }
+  .holiday-banner-card h3 {
+    color: var(--amber-glow); font-size: 1.2rem; font-weight: 800; margin-bottom: 6px;
+  }
+  .holiday-banner-card p {
+    color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;
+  }
+  .btn-undo-holiday {
+    background: rgba(255, 255, 255, 0.06); border: 1px solid var(--glass-border);
+    color: var(--text-main); padding: 10px 18px; border-radius: 10px;
+    font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  }
+
   .result-list {
     background: var(--glass-surface);
     backdrop-filter: blur(16px);
@@ -149,31 +169,35 @@
   .result-row {
     display: flex; justify-content: space-between; align-items: center;
     padding: 16px 0; border-bottom: 1px solid var(--glass-border);
+    gap: 12px; flex-wrap: wrap;
   }
   .result-row:last-child { border-bottom: none; }
-  .result-row .subject-name { font-size: 0.95rem; font-weight: 600; }
+  .result-row .subject-name { font-size: 0.95rem; font-weight: 600; flex: 1; min-width: 120px; }
 
+  /* 3-State Toggle Group */
   .attendance-toggle {
-    position: relative; display: flex;
+    display: flex;
     background: rgba(15, 23, 42, 0.6);
     border-radius: 30px; padding: 4px; gap: 4px;
     border: 1px solid var(--glass-border);
   }
   .attendance-toggle button {
     background: transparent; border: none;
-    color: var(--text-muted); padding: 8px 18px;
-    border-radius: 20px; font-weight: 700; font-size: 0.8rem;
+    color: var(--text-muted); padding: 7px 12px;
+    border-radius: 20px; font-weight: 700; font-size: 0.75rem;
     cursor: pointer; transition: all .25s ease;
   }
-  .attendance-toggle button.active[data-status="present"],
-  .attendance-toggle button.active:first-of-type {
+  .attendance-toggle button.active[data-status="present"] {
     background: var(--teal-glow); color: #042f2e;
     box-shadow: 0 0 16px rgba(45, 212, 191, 0.5);
   }
-  .attendance-toggle.absent button.active,
   .attendance-toggle button.active[data-status="absent"] {
     background: var(--coral-glow); color: #450a0a;
     box-shadow: 0 0 16px rgba(248, 113, 113, 0.5);
+  }
+  .attendance-toggle button.active[data-status="noclass"] {
+    background: var(--amber-glow); color: #451a03;
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
   }
 
   .summary-line {
@@ -181,7 +205,7 @@
     color: var(--teal-glow); text-align: right; font-weight: 600;
   }
 
-  .submit-row { margin-top: 24px; }
+  .submit-row { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
   .submit-btn {
     width: 100%; padding: 16px;
     background: linear-gradient(135deg, #0ea5e9, #2563eb);
@@ -191,9 +215,23 @@
     transition: transform .15s ease;
   }
   .submit-btn:hover { transform: translateY(-1px); }
+
+  /* Entire Day No Classes Button at Bottom */
+  .btn-day-noclass {
+    width: 100%; padding: 13px;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    color: var(--amber-glow); border-radius: 12px;
+    font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    transition: all .2s ease;
+  }
+  .btn-day-noclass:hover {
+    background: rgba(251, 191, 36, 0.18);
+  }
+
   .submitted-note {
     font-size: 0.85rem; color: var(--teal-glow);
-    margin-top: 12px; text-align: center; font-weight: 600;
+    text-align: center; font-weight: 600;
   }
   .empty-note {
     background: var(--glass-surface); border: 1px dashed var(--coral-glow);
@@ -238,13 +276,23 @@
     </div>
   </div>
 
+  <!-- Entire Day Holiday View -->
+  <div id="holiday-view" class="holiday-banner-card hidden">
+    <h3>🌴 Marked as No Classes / Holiday</h3>
+    <p>No classes or attendance records are counted for this date.</p>
+    <button type="button" class="btn-undo-holiday" onclick="removeHoliday()">Revert to Regular Class Day</button>
+  </div>
+
   <div class="empty-note hidden" id="empty-note"></div>
 
-  <div id="result">
+  <!-- Class Attendance List View -->
+  <div id="attendance-view">
     <div class="result-list" id="result-list"></div>
     <div class="summary-line" id="summary-line"></div>
+    
     <div class="submit-row hidden" id="submit-row">
       <button class="submit-btn" id="submit-attendance-btn">Save Attendance for This Date</button>
+      <button type="button" class="btn-day-noclass" onclick="markAsHoliday()">🌴 Mark Entire Day as No Classes</button>
       <div class="submitted-note hidden" id="submitted-note">Saved to your attendance record.</div>
     </div>
   </div>
@@ -254,6 +302,7 @@
 <script>
   const STORAGE_KEY = "timetableData";
   const LOG_KEY = "attendanceLog";
+  const HOLIDAY_KEY = "holidayLog";
 
   function loadData() {
     try {
@@ -275,11 +324,25 @@
     localStorage.setItem(LOG_KEY, JSON.stringify(log));
   }
 
+  function loadHolidays() {
+    try {
+      return JSON.parse(localStorage.getItem(HOLIDAY_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveHolidays(h) {
+    localStorage.setItem(HOLIDAY_KEY, JSON.stringify(h));
+  }
+
   const timetableData = loadData();
   const calendarInput = document.getElementById('attendance-calendar-date');
   const selectedDayName = document.getElementById('selected-day-name');
   const todayPill = document.getElementById('today-pill');
   const emptyNote = document.getElementById('empty-note');
+  const attendanceView = document.getElementById('attendance-view');
+  const holidayView = document.getElementById('holiday-view');
   const resultList = document.getElementById('result-list');
   const summaryLine = document.getElementById('summary-line');
   const submitRow = document.getElementById('submit-row');
@@ -300,9 +363,8 @@
   function showEmpty(message) {
     emptyNote.textContent = message;
     emptyNote.classList.remove('hidden');
-    resultList.innerHTML = '';
-    summaryLine.textContent = '';
-    submitRow.classList.add('hidden');
+    attendanceView.classList.add('hidden');
+    holidayView.classList.add('hidden');
   }
 
   function loadDateAttendance(dateIsoKey) {
@@ -326,6 +388,16 @@
     }
 
     emptyNote.classList.add('hidden');
+
+    const holidays = loadHolidays();
+    if (holidays[dateIsoKey]) {
+      holidayView.classList.remove('hidden');
+      attendanceView.classList.add('hidden');
+      return;
+    }
+
+    holidayView.classList.add('hidden');
+    attendanceView.classList.remove('hidden');
     currentSubjects = subjects;
 
     const log = loadLog();
@@ -339,18 +411,43 @@
     resultList.innerHTML = subjects.map((subject, idx) => `
       <div class="result-row" data-index="${idx}">
         <div class="subject-name">${subject}</div>
-        <div class="attendance-toggle ${attendance[idx] === 'absent' ? 'absent' : ''}" data-index="${idx}">
+        <div class="attendance-toggle" data-index="${idx}">
           <button type="button" class="${attendance[idx] === 'present' ? 'active' : ''}" data-status="present">Present</button>
           <button type="button" class="${attendance[idx] === 'absent' ? 'active' : ''}" data-status="absent">Absent</button>
+          <button type="button" class="${attendance[idx] === 'noclass' ? 'active' : ''}" data-status="noclass">No Class</button>
         </div>
       </div>
     `).join('');
 
     submitRow.classList.remove('hidden');
     submittedNote.classList.toggle('hidden', !existingEntry);
-    if (existingEntry) submittedNote.textContent = "Attendance exists for this date. Resubmit to overwrite.";
+    if (existingEntry) submittedNote.textContent = "Attendance exists for this date. Resubmit to update.";
 
     updateSummary();
+  }
+
+  function markAsHoliday() {
+    if (!currentDateKey) return;
+    if (!confirm(`Mark entire day (${currentDateKey}) as No Classes / Holiday?`)) return;
+
+    const holidays = loadHolidays();
+    holidays[currentDateKey] = true;
+    saveHolidays(holidays);
+
+    const log = loadLog();
+    delete log[currentDateKey];
+    saveLog(log);
+
+    loadDateAttendance(currentDateKey);
+  }
+
+  function removeHoliday() {
+    if (!currentDateKey) return;
+    const holidays = loadHolidays();
+    delete holidays[currentDateKey];
+    saveHolidays(holidays);
+
+    loadDateAttendance(currentDateKey);
   }
 
   resultList.addEventListener('click', (e) => {
@@ -361,7 +458,6 @@
     const status = btn.dataset.status;
 
     attendance[idx] = status;
-    toggle.classList.toggle('absent', status === 'absent');
     toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.status === status));
     updateSummary();
   });
@@ -382,13 +478,14 @@
   });
 
   function updateSummary() {
-    const total = Object.keys(attendance).length;
-    const present = Object.values(attendance).filter(v => v === 'present').length;
-    const absent = total - present;
-    summaryLine.textContent = `${present} present · ${absent} absent · ${total} total`;
+    const totalCount = Object.keys(attendance).length;
+    const presentCount = Object.values(attendance).filter(v => v === 'present').length;
+    const absentCount = Object.values(attendance).filter(v => v === 'absent').length;
+    const noClassCount = Object.values(attendance).filter(v => v === 'noclass').length;
+
+    summaryLine.textContent = `${presentCount} present · ${absentCount} absent · ${noClassCount} cancelled (${totalCount} total)`;
   }
 
-  // Initialize with today's date
   const todayKey = getTodayISTKey();
   calendarInput.value = todayKey;
   loadDateAttendance(todayKey);
