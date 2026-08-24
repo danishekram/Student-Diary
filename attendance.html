@@ -90,7 +90,7 @@
 
   .content-area {
     width: 100%; display: flex; justify-content: center;
-    padding: 96px 20px 60px;
+    padding: 96px 16px 60px;
   }
   .sheet { width: 100%; max-width: 680px; }
 
@@ -105,7 +105,6 @@
     text-decoration: none;
   }
 
-  /* Date Switcher Glass Banner */
   .date-switcher-banner {
     display: flex; flex-direction: column; gap: 14px;
     padding: 18px 20px; border-radius: 16px;
@@ -140,7 +139,6 @@
     filter: invert(1); cursor: pointer;
   }
 
-  /* Holiday Active Card */
   .holiday-banner-card {
     background: rgba(251, 191, 36, 0.08);
     border: 1px solid rgba(251, 191, 36, 0.3);
@@ -163,41 +161,70 @@
     background: var(--glass-surface);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
-    border-radius: 20px; padding: 12px 20px;
+    border-radius: 20px; padding: 12px 16px;
     box-shadow: 0 8px 32px var(--glass-glow);
   }
+  
+  /* Single line layout with subject name and buttons side-by-side */
   .result-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 16px 0; border-bottom: 1px solid var(--glass-border);
-    gap: 12px; flex-wrap: wrap;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--glass-border);
+    gap: 8px;
+    flex-wrap: nowrap; /* Prevents wrapping below the name */
   }
   .result-row:last-child { border-bottom: none; }
-  .result-row .subject-name { font-size: 0.95rem; font-weight: 600; flex: 1; min-width: 120px; }
+  
+  .result-row .subject-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0; /* Allows text truncation on very small screens */
+    padding-right: 6px;
+  }
 
-  /* 3-State Toggle Group */
+  /* Compact 3-Button Toggle in Row */
   .attendance-toggle {
-    display: flex;
+    display: inline-flex;
     background: rgba(15, 23, 42, 0.6);
-    border-radius: 30px; padding: 4px; gap: 4px;
+    border-radius: 30px;
+    padding: 3px;
+    gap: 2px;
     border: 1px solid var(--glass-border);
+    flex-shrink: 0; /* Keeps full button group width */
   }
+  
   .attendance-toggle button {
-    background: transparent; border: none;
-    color: var(--text-muted); padding: 7px 12px;
-    border-radius: 20px; font-weight: 700; font-size: 0.75rem;
-    cursor: pointer; transition: all .25s ease;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 6px 9px;
+    border-radius: 18px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .2s ease;
   }
+
   .attendance-toggle button.active[data-status="present"] {
-    background: var(--teal-glow); color: #042f2e;
-    box-shadow: 0 0 16px rgba(45, 212, 191, 0.5);
+    background: var(--teal-glow);
+    color: #042f2e;
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.4);
   }
   .attendance-toggle button.active[data-status="absent"] {
-    background: var(--coral-glow); color: #450a0a;
-    box-shadow: 0 0 16px rgba(248, 113, 113, 0.5);
+    background: var(--coral-glow);
+    color: #450a0a;
+    box-shadow: 0 0 12px rgba(248, 113, 113, 0.4);
   }
   .attendance-toggle button.active[data-status="noclass"] {
-    background: var(--amber-glow); color: #451a03;
-    box-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
+    background: var(--amber-glow);
+    color: #451a03;
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
   }
 
   .summary-line {
@@ -216,7 +243,6 @@
   }
   .submit-btn:hover { transform: translateY(-1px); }
 
-  /* Entire Day No Classes Button at Bottom */
   .btn-day-noclass {
     width: 100%; padding: 13px;
     background: rgba(251, 191, 36, 0.08);
@@ -410,7 +436,7 @@
 
     resultList.innerHTML = subjects.map((subject, idx) => `
       <div class="result-row" data-index="${idx}">
-        <div class="subject-name">${subject}</div>
+        <div class="subject-name" title="${subject}">${subject}</div>
         <div class="attendance-toggle" data-index="${idx}">
           <button type="button" class="${attendance[idx] === 'present' ? 'active' : ''}" data-status="present">Present</button>
           <button type="button" class="${attendance[idx] === 'absent' ? 'active' : ''}" data-status="absent">Absent</button>
